@@ -1,43 +1,27 @@
-#include <iostream>
-#include <cstring>
-#include <string>
+#include "server.h"
 
-#ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #pragma comment(lib, "ws2_32.lib")  // Necesario para linkear Winsock en Visual Studio
-#else
-    #include <netinet/in.h>
-    #include <sys/socket.h>
-    #include <arpa/inet.h>
-    #include <unistd.h>
-#endif
+using namespace std; // Evita repetir std::
 
-#define PORT 8080
-
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::string;
-
-int main() {
+Server::Server() : server_fd(0), addrlen(sizeof(address)) {
 #ifdef _WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         cerr << "Error al inicializar Winsock" << endl;
-        return -1;
+        exit(EXIT_FAILURE);
     }
 #endif
+}
 
-    int server_fd;
-    struct sockaddr_in address;
-    socklen_t addrlen = sizeof(address);
+Server::~Server() {
+    closeServer();
+}
 
+bool Server::initialize() {
     // Crear el socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == 0) {
         cerr << "Error al crear el socket" << endl;
-        return -1;
+        return false;
     }
 
     address.sin_family = AF_INET;
@@ -47,35 +31,58 @@ int main() {
     // Enlazar el socket
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         cerr << "Error al enlazar el socket" << endl;
-        return -1;
+        return false;
     }
 
     // Poner el socket en modo escucha
     if (listen(server_fd, 5) < 0) {
         cerr << "Error al escuchar en el socket" << endl;
-        return -1;
+        return false;
     }
 
     cout << "Servidor escuchando en el puerto " << PORT << endl;
+    return true;
+}
 
-    // Aceptar conexiones
-    int new_socket = accept(server_fd, (struct sockaddr *)&address, &addrlen);
-    if (new_socket < 0) {
-        cerr << "Error al aceptar la conexión" << endl;
-        return -1;
+void Server::run() {
+    while (true) {
+        int client_socket = accept(server_fd, (struct sockaddr *)&address, &addrlen);
+        if (client_socket < 0) {
+            cerr << "Error al aceptar la conexión" << endl;
+            continue;
+        }
+        cout << "Cliente conectado" << endl;
+        handleClient(client_socket);
     }
-    cout << "Cliente conectado" << endl;
+}
 
+void Server::handleClient(int client_socket) {
     string message = "Bienvenido al servidor!\n";
-    send(new_socket, message.c_str(), message.size(), 0);
+    send(client_socket, message.c_str(), message.size(), 0);
+    
+#ifdef _WIN32
+    closesocket(client_socket);
+#else
+    close(client_socket);
+#endif
+}
 
-    // Cerrar el socket
+void Server::closeServer() {
 #ifdef _WIN32
     closesocket(server_fd);
     WSACleanup();
 #else
     close(server_fd);
 #endif
+}
 
-    return 0;
+int main() {
+    Server server;
+
+    if (!server.initialize()) {
+        return EXIT_FAILURE;
+    }
+
+    server.run();
+    return EXIT_SUCCESS;
 }
