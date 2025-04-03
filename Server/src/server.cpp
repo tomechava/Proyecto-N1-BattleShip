@@ -2,7 +2,6 @@
 #include <cstring>
 #include <string>
 
-
 #ifdef _WIN32
     #include <winsock2.h>
     #include <ws2tcpip.h>
@@ -16,11 +15,16 @@
 
 #define PORT 8080
 
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::string;
+
 int main() {
 #ifdef _WIN32
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Error al inicializar Winsock" << std::endl;
+        cerr << "Error al inicializar Winsock" << endl;
         return -1;
     }
 #endif
@@ -32,7 +36,7 @@ int main() {
     // Crear el socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == 0) {
-        std::cerr << "Error al crear el socket" << std::endl;
+        cerr << "Error al crear el socket" << endl;
         return -1;
     }
 
@@ -42,27 +46,27 @@ int main() {
 
     // Enlazar el socket
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        std::cerr << "Error al enlazar el socket" << std::endl;
+        cerr << "Error al enlazar el socket" << endl;
         return -1;
     }
 
     // Poner el socket en modo escucha
     if (listen(server_fd, 5) < 0) {
-        std::cerr << "Error al escuchar en el socket" << std::endl;
+        cerr << "Error al escuchar en el socket" << endl;
         return -1;
     }
 
-    std::cout << "Servidor escuchando en el puerto " << PORT << std::endl;
+    cout << "Servidor escuchando en el puerto " << PORT << endl;
 
     // Aceptar conexiones
     int new_socket = accept(server_fd, (struct sockaddr *)&address, &addrlen);
     if (new_socket < 0) {
-        std::cerr << "Error al aceptar la conexión" << std::endl;
+        cerr << "Error al aceptar la conexión" << endl;
         return -1;
     }
-    std::cout << "Cliente conectado" << std::endl;
+    cout << "Cliente conectado" << endl;
 
-    std::string message = "Bienvenido al servidor!\n";
+    string message = "Bienvenido al servidor!\n";
     send(new_socket, message.c_str(), message.size(), 0);
 
     // Cerrar el socket
