@@ -1,4 +1,4 @@
-#include "protocol.h"
+#include "../include/protocol.h"
 #include <algorithm>  //Por si toca manipular strings(no seguros aun)
 
 using namespace std; //para evitar repetir  en cada uso

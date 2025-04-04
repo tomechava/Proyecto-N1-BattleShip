@@ -1,5 +1,5 @@
-#include "client_handler.h"
-#include "protocol.h"
+#include "../include/client_handler.h"
+#include "../include/protocol.h"
 #include <iostream>
 #include <thread>
 #include <string>
@@ -21,7 +21,7 @@ void handleClient(int clientSocket) {
         }
 
         string message(buffer);
-        MessageType type = getMessageType(message);     //obtiene el tipo de mensaje
+        MessageType type = stringToMessageType(message);     //obtiene el tipo de mensaje
 
         // Aqui decide la respuesta con base en el protocolo
         string response;

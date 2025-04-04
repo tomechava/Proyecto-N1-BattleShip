@@ -1,5 +1,7 @@
-#include "server.h"              // Declaración de la clase Server
-#include "client_handler.h"      // Función para manejar la conexión de cada cliente
+#include "../include/server.h"              // Declaración de la clase Server
+#include "../include/client_handler.h"      // Función para manejar la conexión de cada cliente
+#include "../include/room.h"              // Clase para manejar las salas de juego
+#include "../include/protocol.h"          // Protocolo de comunicación entre cliente y servidor
 
 #include <thread>                // Librería estándar para crear y gestionar hilos
 
@@ -65,7 +67,7 @@ void Server::run() {
         cout << "Cliente conectado, lanzando hilo..." << endl;
 
         // Crea un hilo para manejar a este cliente. `handleClient` es una función definida aparte.
-        thread clientThread(handleClient, client_socket);
+        thread clientThread(&Server::handleClient, this, client_socket);
 
         // El hilo se separa del hilo principal y se ejecuta en segundo plano
         clientThread.detach();  // Evita tener que hacer `join()`, se limpia automáticamente al terminar
@@ -92,4 +94,38 @@ int main() {
 
     server.run(); // Empieza a aceptar conexiones
     return EXIT_SUCCESS;
+}
+
+//Función que maneja la conexión de cada cliente
+void Server::handleClient(int client_socket) {    
+    // Bloqueamos el mutex para modificar la lista de espera
+    clientsMutex.lock();
+    waitingClients.push_back(client_socket);    // Agregamos el socket del cliente a la lista de espera
+
+    // Si hay al menos dos clientes, emparejamos
+    if (waitingClients.size() >= 2) {
+        // Tomamos los dos primeros de la lista
+        int client1 = waitingClients[0];
+        int client2 = waitingClients[1];
+
+        // Los removemos del vector
+        waitingClients.erase(waitingClients.begin());
+        waitingClients.erase(waitingClients.begin()); // otra vez en el índice 0
+
+        // Desbloqueamos antes de iniciar la room
+        clientsMutex.unlock();
+
+        cout << "Emparejando a dos clientes en una nueva sala..." << endl;
+
+        // Creamos la sala y la ejecutamos en un nuevo hilo
+        thread gameThread([client1, client2]() {
+            Room room(client1, client2);
+            room.run(); // Aquí iría tu lógica de la partida
+        });
+        gameThread.detach();  // Lo dejamos ejecutarse por sí solo
+    } else {
+        // Si aún no hay suficiente, desbloqueamos y el cliente esperará
+        clientsMutex.unlock();
+        cout << "Cliente agregado a la lista de espera. Esperando oponente..." << endl;
+    }
 }

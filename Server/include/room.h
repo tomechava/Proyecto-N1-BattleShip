@@ -11,8 +11,7 @@ struct Room {
     bool game_running;     // Indica si el juego está en curso
 
     Room(int p1, int p2);
-    void startGame();
-    void handleGame(); // Lógica del juego
+    void run();
     
 };
 

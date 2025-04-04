@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <vector>        // Para manejar listas dinámicas (vector)
+#include <mutex>        // Para manejar la sincronización entre hilos
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -22,17 +24,19 @@ class Server {
 public:
     Server();
     ~Server();
-    
+
     bool initialize();
     void run();
-    
+    void handleClient(int client_socket);   // Maneja la conexión de cada cliente
+    void closeServer(); 
+
 private:
     int server_fd;
     struct sockaddr_in address;
     socklen_t addrlen;
 
-    void closeServer();
-    void handleClient(int client_socket);
+    std::vector<int> waitingClients; // Almacena los sockets de clientes en espera
+    std::mutex clientsMutex;         // Protege el acceso a waitingClients
 };
 
 #endif // SERVER_H
