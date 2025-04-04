@@ -7,6 +7,6 @@
 #include <sys/socket.h>
 #endif
 
-void handleClient(int clientSocket);
+void handleClientMessages(int clientSocket);
 
 #endif

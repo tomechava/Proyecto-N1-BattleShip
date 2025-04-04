@@ -2,7 +2,7 @@
 #include "../include/client_handler.h"      // Función para manejar la conexión de cada cliente
 #include "../include/room.h"              // Clase para manejar las salas de juego
 #include "../include/protocol.h"          // Protocolo de comunicación entre cliente y servidor
-
+#include "../include/utils.h"
 #include <thread>                // Librería estándar para crear y gestionar hilos
 
 using namespace std;             // Evita tener que escribir std::string, std::cout, etc.
@@ -76,11 +76,9 @@ void Server::run() {
 
 // Método que cierra el socket del servidor (según si es Linux o Windows)
 void Server::closeServer() {
+    CLOSE_SOCKET(server_fd);
 #ifdef _WIN32
-    closesocket(server_fd); // Cierra socket en Windows
     WSACleanup();           // Libera recursos de Winsock
-#else
-    close(server_fd);       // Cierra socket en Linux/Mac
 #endif
 }
 

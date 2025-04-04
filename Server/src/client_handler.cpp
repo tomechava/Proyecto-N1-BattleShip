@@ -1,5 +1,6 @@
 #include "../include/client_handler.h"
 #include "../include/protocol.h"
+#include "../include/utils.h"
 #include <iostream>
 #include <thread>
 #include <string>
@@ -7,7 +8,7 @@
 
 using namespace std;
 
-void handleClient(int clientSocket) {
+void handleClientMessages(int clientSocket) {
     char buffer[1024];
     int bytesReceived;
 
@@ -64,9 +65,6 @@ void handleClient(int clientSocket) {
         send(clientSocket, response.c_str(), response.size(), 0);
     }
 
-#ifdef _WIN32
-    closesocket(clientSocket);
-#else
-    close(clientSocket);
-#endif
+    CLOSE_SOCKET(clientSocket);
+
 }
