@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void handleClientMessages(int clientSocket) {
+void handleClientMessages(int clientSocket, Room* room) {
     char buffer[1024];
     int bytesReceived;
 

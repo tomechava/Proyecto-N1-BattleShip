@@ -49,7 +49,7 @@ def receive_messages(sock):
             break
 
 
-"""
+
 def main():
     global own_board
 
@@ -61,11 +61,11 @@ def main():
         own_board = place_ships()
         placed_cells = list(own_board.keys())
         
-        send_message(sock, ProtocolMessage(MessageType.PLACE, placed_cells))
+        print("Barcos colocados en el tablero:")
         print_board(own_board)
 
         input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        send_message(sock, ProtocolMessage(MessageType.READY, []))
+        send_message(sock, ProtocolMessage(MessageType.READY, [own_board]))
 
         # Inicia el hilo para recibir mensajes
         threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
@@ -81,34 +81,6 @@ def main():
             except (KeyboardInterrupt, EOFError):
                 print("Saliendo del juego...")
                 break
-"""
+
 
     
-#Prueba main localmente sin conectarse a ningun servidor:
-def main():
-    global own_board
-
-    # Fase de colocación de barcos
-    own_board, all_ship_positions, ships_list = place_ships(own_board)       
-    
-    print_board(own_board)
-
-    input("Presiona ENTER cuando estés listo para comenzar el juego.")
-
-    # Inicia el hilo para recibir mensajes
-    
-
-    # Loop de turnos del jugador
-    while True:
-        try:
-            cell = input("📍 Coordenada a disparar (ej: A5): ").upper()
-            if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
-                print("Formato inválido.")
-                continue
-
-        except (KeyboardInterrupt, EOFError):
-            print("Saliendo del juego...")
-            break
-        
-if __name__ == "__main__":
-    main()

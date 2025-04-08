@@ -42,7 +42,7 @@ private:
     void gameLoop();
 
     // Métodos para manejar distintos tipos de mensajes
-    void handlePlace(int playerSocket, const ProtocolMessage& msg);
+    
     void handleReady(int playerSocket);
     void handleFire(int playerSocket, const ProtocolMessage& msg);
     void handleChat(int senderSocket, const ProtocolMessage& msg);

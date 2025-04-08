@@ -90,7 +90,7 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
             handlePlace(playerSocket, msg);
             break;
         case MessageType::READY:
-            handleReady(playerSocket);
+            handleReady(playerSocket, msg);
             break;
         case MessageType::FIRE:
             handleFire(playerSocket, msg);
@@ -103,42 +103,12 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
     }
 }
 
-// -------------------------- FUNCIONES AUXILIARES -----------------------------
-//Colocacion de barcos
-void Room::handlePlace(int playerSocket, const ProtocolMessage& msg) {
-    if (msg.data.empty()) {
-        string error = "Error: no se recibieron coordenadas para PLACE.\n";
-        send(playerSocket, error.c_str(), error.size(), 0);
-        return;
-    }
 
-    std::map<std::string, bool>& board = (playerSocket == player1_socket) ? player1_board : player2_board;
-
-    // Evitar que reemplacen una colocación ya hecha
-    if (!board.empty()) {
-        string error = "Ya colocaste tus barcos.\n";
-        send(playerSocket, error.c_str(), error.size(), 0);
-        return;
-    }
-
-    for (const string& cell : msg.data) {
-        // Validación básica: tamaño 2 o 3 (ej. A1, B10)
-        if (cell.size() < 2 || cell.size() > 3) {
-            string error = "Coordenada inválida: " + cell + "\n";
-            send(playerSocket, error.c_str(), error.size(), 0);
-            return;
-        }
-        board[cell] = true;
-    }
-
-    string confirm = "Barcos colocados con éxito.\n";
-    send(playerSocket, confirm.c_str(), confirm.size(), 0);
-
-    logWithTimestamp("Jugador colocó barcos: " + std::to_string(board.size()) + " celdas.");
-}
 
 // Manejo de la señal de "listo"
-void Room::handleReady(int playerSocket) {
+void Room::handleReady(int playerSocket, ProtocolMessage& msg) {
+    if (playerSocket == player1_socket) player1_board = msg.data[];
+    if (playerSocket == player2_socket) player2_board = msg.data[]; 
     if (playerSocket == player1_socket) player1_ready = true;
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
