@@ -13,56 +13,25 @@ void handleClientMessages(int clientSocket) {
     int bytesReceived;
 
     while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        memset(buffer, 0, sizeof(buffer));  // Limpiar el buffer antes de recibir un nuevo mensaje
+        bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);  // Recibir mensaje del cliente
 
-        if (bytesReceived <= 0) {
-            cout << "Cliente desconectado." << endl;
+        if (bytesReceived <= 0) {       // Si no se recibe nada o hay un error, el cliente se desconecta
+            logWithTimestamp("Cliente desconectado.");
             break;
         }
 
-        string message(buffer);
-        MessageType type = stringToMessageType(message);     //obtiene el tipo de mensaje
+        string rawMessage(buffer);
+        ProtocolMessage msg = parseMessage(rawMessage);
 
-        // Aqui decide la respuesta con base en el protocolo
-        string response;
-        switch (type) {
-            case MessageType::REGISTER:
-                response = "REGISTRO_OK";
-                break;
-            case MessageType::READY:
-                response = "LISTO_OK";
-                break;
-            case MessageType::FIRE:
-                response = "DISPARO_OK";
-                break;
-            case MessageType::HIT:
-                response = "GOLPEADO_OK";
-                break;
-            case MessageType::MISS:
-                response = "FALLADO_OK";
-                break;
-            case MessageType::SUNK:
-                response = "HUNDIDO_OK";
-                break;
-            case MessageType::WIN:
-                response = "GANASTE_OK";
-                break;
-            case MessageType::LOSE:
-                response = "PERDISTE_OK";
-                break;
-            case MessageType::CHAT:
-                response = "CHAT_OK";
-                break;
-            case MessageType::DISCONNECT:
-                response = "DESCONECTADO_OK";
-                break;
-            default:
-                response = "ERROR_COMANDO";
-                break;
+       if (msg.type == MessageType::UNKNOWN) {  // Si el mensaje no es válido, enviamos un error
+            string errorMsg = createMessage(MessageType::UNKNOWN, { "Comando no válido" });
+            send(clientSocket, errorMsg.c_str(), errorMsg.size(), 0);       // Enviar mensaje de error a cliente
+            continue;
         }
 
-        send(clientSocket, response.c_str(), response.size(), 0);
+        // Pasar el mensaje a la sala (Room) para que decida qué hacer
+        room->onPlayerMessage(clientSocket, msg);
     }
 
     CLOSE_SOCKET(clientSocket);

@@ -16,11 +16,15 @@ Room::Room(int player1_socket, int player2_socket)
 
 // Método que ejecuta la sala de juego
 void Room::run() {
-    cout << "Room creada entre dos jugadores." << endl;
+    logWithTimestamp("Room creada entre dos jugadores.");
+
+    // Inicializa los estados
+    player1_ready = false;
+    player2_ready = false;
 
     // Mensajes simples para cada jugador
-    string mensajeJugador1 = "Estás en una sala. Espera el turno del otro jugador.\n";
-    string mensajeJugador2 = "Estás en una sala. Empiezas tú.\n";
+    string mensajeJugador1 = "Bienvenido. Esperando a que coloques tus barcos.\n";
+    string mensajeJugador2 = "Bienvenido. Esperando a que coloques tus barcos.\n";
 
 #ifdef _WIN32   // En Windows, se usa send() directamente
     send(player1_socket, mensajeJugador1.c_str(), mensajeJugador1.size(), 0);
@@ -37,20 +41,73 @@ void Room::run() {
     }
 #endif
 
-    // Lanzamos un hilo para manejar los mensajes del jugador 1
-    thread t1(handleClientMessages, player1_socket);
+    // Iniciar hilos para escuchar mensajes de los jugadores
+    std::thread t1([this]() {
+        handleClientMessages(player1_socket, this); // <- le pasamos la room
+    });
+    std::thread t2([this]() {
+        handleClientMessages(player2_socket, this);
+    });
 
-    // Lanzamos un hilo para manejar los mensajes del jugador 2
-    thread t2(handleClientMessages, player2_socket);
+    // Esperar que ambos jugadores estén listos
+    waitForPlayersReady();
+
+    logWithTimestamp("Ambos jugadores listos. ¡Comienza el juego!");
+
+    current_turn_socket = player2_socket; // por ejemplo, el player 2 comienza
+    other_player_socket = player1_socket;
+
+    gameLoop();
 
     // Esperamos que ambos terminen
     t1.join();
     t2.join();
 
-    cout << "Una sala ha finalizado porque un jugador se desconectó." << endl;
+    cout << "Una sala ha finalizado." << endl;
 
 
     // Cerrar sockets al terminar
     CLOSE_SOCKET(player1_socket);
     CLOSE_SOCKET(player2_socket);
+}
+
+
+void Room::waitForPlayersReady() {
+    while (!player1_ready || !player2_ready) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+}
+
+
+void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
+    std::lock_guard<std::mutex> lock(game_mutex);
+
+    switch (msg.type) {
+        case MessageType::READY:
+            if (playerSocket == player1_socket) player1_ready = true;
+            if (playerSocket == player2_socket) player2_ready = true;
+            break;
+
+        case MessageType::FIRE:
+            if (playerSocket == current_turn_socket) {
+                // TODO: Validar disparo y cambiar turno
+                string cell = msg.data[0]; // por ejemplo, "B4"
+                logWithTimestamp("Jugador disparó a " + cell);
+
+                // Simulación simple:
+                string response = createMessage(MessageType::MISS, { cell });
+                send(current_turn_socket, response.c_str(), response.size(), 0);
+                send(other_player_socket, response.c_str(), response.size(), 0);
+
+                std::swap(current_turn_socket, other_player_socket);
+            } else {
+                string warning = "No es tu turno.\n";
+                send(playerSocket, warning.c_str(), warning.size(), 0);
+            }
+            break;
+
+        default:
+            // Ignorar o loggear otros tipos
+            break;
+    }
 }
