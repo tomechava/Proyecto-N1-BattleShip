@@ -48,6 +48,8 @@ def receive_messages(sock):
             print(f"Error recibiendo mensaje: {e}")
             break
 
+
+"""
 def main():
     global own_board
 
@@ -79,6 +81,34 @@ def main():
             except (KeyboardInterrupt, EOFError):
                 print("Saliendo del juego...")
                 break
+"""
 
+    
+#Prueba main localmente sin conectarse a ningun servidor:
+def main():
+    global own_board
+
+    # Fase de colocación de barcos
+    own_board, all_ship_positions, ships_list = place_ships(own_board)       
+    
+    print_board(own_board)
+
+    input("Presiona ENTER cuando estés listo para comenzar el juego.")
+
+    # Inicia el hilo para recibir mensajes
+    
+
+    # Loop de turnos del jugador
+    while True:
+        try:
+            cell = input("📍 Coordenada a disparar (ej: A5): ").upper()
+            if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
+                print("Formato inválido.")
+                continue
+
+        except (KeyboardInterrupt, EOFError):
+            print("Saliendo del juego...")
+            break
+        
 if __name__ == "__main__":
     main()

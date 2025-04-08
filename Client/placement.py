@@ -1,5 +1,5 @@
 # battleship_client/placement.py
-
+import utils
 import string
 
 BOARD_SIZE = 10
@@ -45,7 +45,8 @@ def place_ships(board):
     print("Coloca tus barcos. Tablero de 10x10, filas A-J y columnas 1-10.")
     placed_cells = set()
     all_ship_positions = []
-
+    ships_list = []
+    
     for ship_name, ship_size in SHIP_RULES.items():
         while True:
             print(f"\nColoca el {ship_name} ({ship_size} casillas):")
@@ -57,6 +58,7 @@ def place_ships(board):
                 continue
 
             coords = generate_coordinates(start, end)
+            print(f"  Coordenadas generadas: {coords}")
 
             if len(coords) != ship_size:    # Verifica el tamaño del barco
                 print(f"  ❌ El {ship_name} debe ocupar exactamente {ship_size} casillas.")
@@ -67,15 +69,26 @@ def place_ships(board):
                 continue
 
             placed_cells.update(coords) # Actualiza las celdas ocupadas
+            print(f"  ✅ {ship_name} colocado en {coords}.")
+            
+            ships_list.append(coords)  # Guarda el nombre del barco
+            
             all_ship_positions.extend(coords)   # Guarda las posiciones del barco
+            print("Barcos colocados hasta ahora:", all_ship_positions)
+            
             board_with_ships = update_board_graphically(board, coords, ship_name)  # Actualiza el tablero gráficamente
+            board = board_with_ships.copy()
             print(f"  ✅ {ship_name} colocado.")    #
             break
 
-    return board_with_ships, all_ship_positions
+    return board_with_ships, all_ship_positions, ships_list
 
 def update_board_graphically(board, coords, ship_name):
     for cell in coords:
         board[cell] = ship_name[0]  # Coloca la inicial del barco
+        print(f"  {cell} -> {board[cell]}")  # Muestra la celda y su contenido
+    print("Tablero actualizado:")
+    utils.print_board(board, title="Tu Tablero", show_ships=True)
+    # Imprime el tablero actualizado
     return board
 

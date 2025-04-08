@@ -3,7 +3,7 @@ import string
 def print_board(board, title="Tablero", show_ships=True):
     """
     Imprime un tablero 10x10 desde un diccionario de celdas.
-    `show_ships=True` permite ocultar barcos (para tablero enemigo).
+    `show_ships=True` permite mostrar barcos (para tablero propio).
     """
     rows = list(string.ascii_uppercase[:10])
     cols = list(map(str, range(1, 11)))
@@ -17,15 +17,14 @@ def print_board(board, title="Tablero", show_ships=True):
         for col in cols:
             cell = f"{row}{col}"
             symbol = "."
-
             if cell in board:
                 content = board[cell]
-                if content == "B":
-                    symbol = "B" if show_ships else "."
-                elif content == "X":
+                if content == "X":
                     symbol = "X"
                 elif content == "O":
                     symbol = "O"
+                elif show_ships:
+                    symbol = content  # Mostrar inicial del barco si está habilitado
             line += f" {symbol:>2}"
         print(line)
 
