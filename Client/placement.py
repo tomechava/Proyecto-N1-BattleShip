@@ -79,16 +79,3 @@ def update_board_graphically(board, coords, ship_name):
         board[cell] = ship_name[0]  # Coloca la inicial del barco
     return board
 
-def main():
-    board = {f"{row}{col}": "." for row in LETTERS for col in range(1, BOARD_SIZE + 1)}
-    placed_board, all_ship_positions = place_ships(board)
-    
-    print("\nTablero final:")
-    for cell, value in placed_board.items():
-        print(f"{cell}: {value}")
-
-    print("\nPosiciones de los barcos:")
-    print(", ".join(all_ship_positions))
-    
-if __name__ == "__main__":
-    main()
