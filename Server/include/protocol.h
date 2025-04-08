@@ -19,6 +19,7 @@ enum class MessageType {    //define los tipos de mensajes que se pueden enviar
     LOSE,
     CHAT,
     DISCONNECT,
+    PLACE,
     UNKNOWN
 };
 
