@@ -62,6 +62,24 @@ def main():
                 print(f"❌ No se pudo conectar al servidor en {HOST}:{PORT}.")
                 print(f"Detalles del error: {e}")
                 return  # salir del programa si no hay conexión
+            
+            # Inicia el hilo para recibir mensajes
+            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
+            
+            #Espera en Loop mientras se le une a una ROOM
+            while True:
+                try:
+                    raw = sock.recv(1024).decode().strip()
+                    if not raw:
+                        print("Desconectado del servidor.")
+                        break
+                    msg = ProtocolMessage.from_string(raw)
+                    if msg.type == MessageType.REGISTER:
+                        print(f"📦 Te has unido a la sala: {msg.data[0]}")
+                        break
+                except Exception as e:
+                    print(f"Error recibiendo mensaje: {e}")
+                    break
 
             # Fase de colocación de barcos
             own_board, all_ship_positions, ships_list = place_ships(own_board)
@@ -73,8 +91,6 @@ def main():
             input("Presiona ENTER cuando estés listo para comenzar el juego.")
             send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
-            # Inicia el hilo para recibir mensajes
-            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
 
             # Loop de turnos del jugador
             while True:

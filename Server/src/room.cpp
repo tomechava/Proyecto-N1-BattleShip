@@ -27,8 +27,17 @@ void Room::run() {
     player2_ready = false;
 
     // Mensajes simples para cada jugador
-    string mensajeJugador1 = "Bienvenido. Esperando a que coloques tus barcos.\n";
-    string mensajeJugador2 = "Bienvenido. Esperando a que coloques tus barcos.\n";
+    string mensajeJugador = "Bienvenido. Esperando a que coloques tus barcos.\n";
+
+    //Enviar REGISTER y mensajeJugador a cada jugador
+    ProtocolMessage msg = { MessageType::REGISTER, {} };
+
+    msg.data.push_back(mensajeJugador);
+    string room_joined_msg = createMessage(MessageType::REGISTER, msg.data);
+
+    // Enviar mensaje de registro a ambos jugadores
+    send(player1_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
+    send(player2_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
 
 #ifdef _WIN32   // En Windows, se usa send() directamente
     send(player1_socket, mensajeJugador1.c_str(), mensajeJugador1.size(), 0);
