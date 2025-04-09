@@ -63,9 +63,6 @@ def main():
                 print(f"Detalles del error: {e}")
                 return  # salir del programa si no hay conexión
             
-            # Inicia el hilo para recibir mensajes
-            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
-            
             #Espera en Loop mientras se le une a una ROOM
             while True:
                 try:
@@ -80,7 +77,7 @@ def main():
                 except Exception as e:
                     print(f"Error recibiendo mensaje: {e}")
                     break
-
+                
             # Fase de colocación de barcos
             own_board, all_ship_positions, ships_list = place_ships(own_board)
             placed_cells = list(own_board.keys())
@@ -91,6 +88,8 @@ def main():
             input("Presiona ENTER cuando estés listo para comenzar el juego.")
             send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
+            # Inicia el hilo para recibir mensajes
+            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
 
             # Loop de turnos del jugador
             while True:
