@@ -236,7 +236,7 @@ void Room::gameLoop() {
 }
 
 //Transformar msg de botes a arreglo bidimensional
-vector<vector<string>> convertBoats(const vector<string>& data) {
+vector<vector<string>> Room::convertBoats(const vector<string>& data) {
     vector<vector<string>> resultado;
 
     for (const string& grupo : data) {
