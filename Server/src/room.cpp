@@ -86,11 +86,8 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
     std::lock_guard<std::mutex> lock(game_mutex);
 
     switch (msg.type) {
-        case MessageType::PLACE:
-            handlePlace(playerSocket, msg);
-            break;
         case MessageType::READY:
-            handleReady(playerSocket);
+            handleReady(playerSocket, msg);
             break;
         case MessageType::FIRE:
             handleFire(playerSocket, msg);
@@ -103,42 +100,11 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
     }
 }
 
-// -------------------------- FUNCIONES AUXILIARES -----------------------------
-//Colocacion de barcos
-void Room::handlePlace(int playerSocket, const ProtocolMessage& msg) {
-    if (msg.data.empty()) {
-        string error = "Error: no se recibieron coordenadas para PLACE.\n";
-        send(playerSocket, error.c_str(), error.size(), 0);
-        return;
-    }
-
-    std::map<std::string, bool>& board = (playerSocket == player1_socket) ? player1_board : player2_board;
-
-    // Evitar que reemplacen una colocación ya hecha
-    if (!board.empty()) {
-        string error = "Ya colocaste tus barcos.\n";
-        send(playerSocket, error.c_str(), error.size(), 0);
-        return;
-    }
-
-    for (const string& cell : msg.data) {
-        // Validación básica: tamaño 2 o 3 (ej. A1, B10)
-        if (cell.size() < 2 || cell.size() > 3) {
-            string error = "Coordenada inválida: " + cell + "\n";
-            send(playerSocket, error.c_str(), error.size(), 0);
-            return;
-        }
-        board[cell] = true;
-    }
-
-    string confirm = "Barcos colocados con éxito.\n";
-    send(playerSocket, confirm.c_str(), confirm.size(), 0);
-
-    logWithTimestamp("Jugador colocó barcos: " + std::to_string(board.size()) + " celdas.");
-}
 
 // Manejo de la señal de "listo"
-void Room::handleReady(int playerSocket) {
+void Room::handleReady(int playerSocket, const ProtocolMessage& msg) {
+    if (playerSocket == player1_socket) player1_boats = convertBoats(msg.data);
+    if (playerSocket == player2_socket) player2_boats = convertBoats(msg.data); 
     if (playerSocket == player1_socket) player1_ready = true;
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
@@ -159,9 +125,15 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    bool hit = applyFire(playerSocket, cell);
+    auto [hit, sunk] = applyFire(playerSocket, cell);
 
-    MessageType result = hit ? MessageType::HIT : MessageType::MISS;
+    MessageType result;
+    if (sunk) {
+        result = MessageType::SUNK;
+    } else {
+        result = hit ? MessageType::HIT : MessageType::MISS;
+    }
+
     string response = createMessage(result, { cell });
 
     send(current_turn_socket, response.c_str(), response.size(), 0);
@@ -186,7 +158,7 @@ void Room::handleVictory(int winnerSocket) {
     logWithTimestamp("Juego terminado. ¡Hay un ganador!");
 }
 
-// Manejo de la señal de "chat"
+// Manejo de xla señal de "chat"
 void Room::handleChat(int senderSocket, const ProtocolMessage& msg) {
     if (!msg.data.empty()) {
         string chatMsg = "Jugador dice: " + msg.data[0] + "\n";
@@ -195,27 +167,64 @@ void Room::handleChat(int senderSocket, const ProtocolMessage& msg) {
     }
 }
 
-// Aplicar el disparo a la celda
-bool Room::applyFire(int attackerSocket, const string& cell) {
-    bool hit = false;
+// Metodo para agregar las casillas jugadas a un arreglo (individual por cada player)
+void Room::addSelectedCell(int playerSocket, const std::string&cell ){
+    if (playerSocket == player1_socket){
+        player1_selected_cells.push_back(cell);
+    }else if (playerSocket == player2_socket){
+        player2_selected_cells.push_back(cell);
+    }
+    
+}
 
-    if (attackerSocket == player1_socket) {
-        hit = player2_board[cell];
-        if (hit) player2_board[cell] = false;
-    } else {
-        hit = player1_board[cell];
-        if (hit) player1_board[cell] = false;
+// Aplicar el disparo a la celda
+std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
+    bool hit = false;
+    bool sunk = false;
+
+    auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
+    auto& opponent_selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
+
+    for (const auto& boat : opponent_boats) {
+        if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
+            hit = true;
+            break;
+        }
     }
 
-    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)"));
-    return hit;
+    if (hit) {
+        opponent_selected_cells.push_back(cell);
+
+        // Revisar si algún barco fue hundido completamente
+        for (const auto& boat : opponent_boats) {
+            bool all_hit = true;
+            for (const auto& part : boat) {
+                if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), part) == opponent_selected_cells.end()) {
+                    all_hit = false;
+                    break;
+                }
+            }
+            if (all_hit && std::find(boat.begin(), boat.end(), cell) != boat.end()) {
+                sunk = true;
+                break;
+            }
+        }
+    }
+
+    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
+    return {hit, sunk};
 }
 
 // Verificar si el jugador ha ganado
 bool Room::checkVictory(int attackerSocket) {
     const auto& board = (attackerSocket == player1_socket) ? player2_board : player1_board;
-    for (const auto& cell : board) {
-        if (cell.second) return false;
+    const auto& selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
+    for (const auto& boat : board) {
+        for (const auto& coord : boat) {
+            if (find(selected_cells.begin(), selected_cells.end(), coord) == selected_cells.end()) {
+                return false; // Coordenada no encontrada
+            }
+        }
     }
     return true;
 }
@@ -223,4 +232,23 @@ bool Room::checkVictory(int attackerSocket) {
 // Método que maneja el bucle del juego
 void Room::gameLoop() {
     logWithTimestamp("Loop del juego iniciado. Turnos serán manejados por los mensajes FIRE.");
+}
+
+//Transformar msg de botes a arreglo bidimensional
+vector<vector<string>> convertBoats(const vector<string>& data) {
+    vector<vector<string>> resultado;
+
+    for (const string& grupo : data) {
+        vector<string> subgrupo;
+        stringstream ss(grupo);
+        string token;
+
+        while (getline(ss, token, ',')) {
+            subgrupo.push_back(token);
+        }
+
+        resultado.push_back(subgrupo);
+    }
+
+    return resultado;
 }
