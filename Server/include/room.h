@@ -10,6 +10,7 @@
     #include <arpa/inet.h>
 #endif
 
+#include <cstring>
 #include <string>
 #include <map>
 #include <mutex>

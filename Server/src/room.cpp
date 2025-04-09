@@ -217,7 +217,7 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
 
 // Verificar si el jugador ha ganado
 bool Room::checkVictory(int attackerSocket) {
-    const auto& board = (attackerSocket == player1_socket) ? player2_board : player1_board;
+    const auto& boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
     const auto& selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
     for (const auto& boat : board) {
         for (const auto& coord : boat) {
