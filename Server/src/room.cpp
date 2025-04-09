@@ -86,9 +86,6 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
     std::lock_guard<std::mutex> lock(game_mutex);
 
     switch (msg.type) {
-        case MessageType::PLACE:
-            handlePlace(playerSocket, msg);
-            break;
         case MessageType::READY:
             handleReady(playerSocket, msg);
             break;
@@ -104,11 +101,10 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
 }
 
 
-
 // Manejo de la señal de "listo"
-void Room::handleReady(int playerSocket, ProtocolMessage& msg) {
-    if (playerSocket == player1_socket) player1_board = msg.data[];
-    if (playerSocket == player2_socket) player2_board = msg.data[]; 
+void Room::handleReady(int playerSocket, const ProtocolMessage& msg) {
+    if (playerSocket == player1_socket) player1_boats = convertBoats(msg.data);
+    if (playerSocket == player2_socket) player2_boats = convertBoats(msg.data); 
     if (playerSocket == player1_socket) player1_ready = true;
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
@@ -165,15 +161,25 @@ void Room::handleChat(int senderSocket, const ProtocolMessage& msg) {
     }
 }
 
+// Metodo para agregar las casillas jugadas a un arreglo (individual por cada player)
+void Room::addSelectedCell(int playerSocket, const std::string&cell ){
+    if (playerSocket == player1_socket){
+        player1_selected_cells.push_back(cell);
+    }else if (playerSocket == player2_socket){
+        player2_selected_cells.push_back(cell);
+    }
+    
+}
+
 // Aplicar el disparo a la celda
 bool Room::applyFire(int attackerSocket, const string& cell) {
     bool hit = false;
 
     if (attackerSocket == player1_socket) {
-        hit = player2_board[cell];
+        hit = player2_boats[cell];
         if (hit) player2_board[cell] = false;
     } else {
-        hit = player1_board[cell];
+        hit = player1_boats[cell];
         if (hit) player1_board[cell] = false;
     }
 
@@ -193,4 +199,23 @@ bool Room::checkVictory(int attackerSocket) {
 // Método que maneja el bucle del juego
 void Room::gameLoop() {
     logWithTimestamp("Loop del juego iniciado. Turnos serán manejados por los mensajes FIRE.");
+}
+
+//Transformar msg de botes a arreglo bidimensional
+vector<vector<string>> convertBoats(const vector<string>& data) {
+    vector<vector<string>> resultado;
+
+    for (const string& grupo : data) {
+        vector<string> subgrupo;
+        stringstream ss(grupo);
+        string token;
+
+        while (getline(ss, token, ',')) {
+            subgrupo.push_back(token);
+        }
+
+        resultado.push_back(subgrupo);
+    }
+
+    return resultado;
 }

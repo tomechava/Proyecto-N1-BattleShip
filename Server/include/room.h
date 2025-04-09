@@ -21,6 +21,7 @@ public:
     Room(int player1_socket, int player2_socket);
     void run();
     void onPlayerMessage(int playerSocket, const ProtocolMessage& msg);
+    
 
 private:
     int player1_socket;
@@ -43,7 +44,7 @@ private:
 
     // Métodos para manejar distintos tipos de mensajes
     
-    void handleReady(int playerSocket);
+    void handleReady(int playerSocket, ProtocolMessage& msg);	
     void handleFire(int playerSocket, const ProtocolMessage& msg);
     void handleChat(int senderSocket, const ProtocolMessage& msg);
     void handleVictory(int winnerSocket);

@@ -4,8 +4,8 @@ from protocol import ProtocolMessage, MessageType
 from placement import place_ships, generate_coordinates, is_valid_coordinate
 from utils import print_board, create_empty_board
 
-HOST = '127.0.0.1'
-PORT = 12345
+HOST = '54.166.91.45' # poner tu direccion propia de ip dependiendo de la instancia que se abra
+PORT = 8080
 
 # Inicializa los tableros
 own_board = create_empty_board()
@@ -58,14 +58,14 @@ def main():
         print("Conectado al servidor.")
 
         # Fase de colocación de barcos
-        own_board = place_ships()
+        own_board, all_ship_positions, ships_list = place_ships()
         placed_cells = list(own_board.keys())
         
         print("Barcos colocados en el tablero:")
         print_board(own_board)
 
         input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        send_message(sock, ProtocolMessage(MessageType.READY, [own_board]))
+        send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
         # Inicia el hilo para recibir mensajes
         threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
