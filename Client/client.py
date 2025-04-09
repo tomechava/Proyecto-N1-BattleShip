@@ -49,38 +49,45 @@ def receive_messages(sock):
             break
 
 
-
 def main():
     global own_board
 
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect((HOST, PORT))
-        print("Conectado al servidor.")
-
-        # Fase de colocación de barcos
-        own_board, all_ship_positions, ships_list = place_ships()
-        placed_cells = list(own_board.keys())
-        
-        print("Barcos colocados en el tablero:")
-        print_board(own_board)
-
-        input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
-
-        # Inicia el hilo para recibir mensajes
-        threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
-
-        # Loop de turnos del jugador
-        while True:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(5)  # tiempo de espera para intentar conectar
             try:
-                cell = input("📍 Coordenada a disparar (ej: A5): ").upper()
-                if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
-                    print("Formato inválido.")
-                    continue
-                send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
-            except (KeyboardInterrupt, EOFError):
-                print("Saliendo del juego...")
-                break
+                sock.connect((HOST, PORT))
+                print("✅ Conectado al servidor.")
+            except (socket.timeout, ConnectionRefusedError, OSError) as e:
+                print(f"❌ No se pudo conectar al servidor en {HOST}:{PORT}.")
+                print(f"Detalles del error: {e}")
+                return  # salir del programa si no hay conexión
 
+            # Fase de colocación de barcos
+            own_board, all_ship_positions, ships_list = place_ships()
+            placed_cells = list(own_board.keys())
+            
+            print("🛳️ Barcos colocados en el tablero:")
+            print_board(own_board)
+
+            input("Presiona ENTER cuando estés listo para comenzar el juego.")
+            send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
+
+            # Inicia el hilo para recibir mensajes
+            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
+
+            # Loop de turnos del jugador
+            while True:
+                try:
+                    cell = input("📍 Coordenada a disparar (ej: A5): ").upper()
+                    if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
+                        print("❗ Formato inválido.")
+                        continue
+                    send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
+                except (KeyboardInterrupt, EOFError):
+                    print("👋 Saliendo del juego...")
+                    break
+    except Exception as e:
+        print(f"❌ Ocurrió un error inesperado: {e}")
 
     
