@@ -4,7 +4,7 @@ from protocol import ProtocolMessage, MessageType
 from placement import place_ships, generate_coordinates, is_valid_coordinate
 from utils import print_board, create_empty_board
 
-HOST = '54.166.91.45' # poner tu direccion propia de ip dependiendo de la instancia que se abra
+HOST = '54.173.19.229' # poner tu direccion propia de ip dependiendo de la instancia que se abra
 PORT = 8080
 
 # Inicializa los tableros
