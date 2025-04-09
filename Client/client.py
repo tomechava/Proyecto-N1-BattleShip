@@ -90,4 +90,6 @@ def main():
     except Exception as e:
         print(f"❌ Ocurrió un error inesperado: {e}")
 
-    
+def __init__():
+    if __name__ == "__main__":
+        main()
