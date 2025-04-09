@@ -125,9 +125,15 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    bool hit = applyFire(playerSocket, cell);
+    auto [hit, sunk] = applyFire(playerSocket, cell);
 
-    MessageType result = hit ? MessageType::HIT : MessageType::MISS;
+    MessageType result;
+    if (sunk) {
+        result = MessageType::SUNK;
+    } else {
+        result = hit ? MessageType::HIT : MessageType::MISS;
+    }
+
     string response = createMessage(result, { cell });
 
     send(current_turn_socket, response.c_str(), response.size(), 0);
@@ -152,7 +158,7 @@ void Room::handleVictory(int winnerSocket) {
     logWithTimestamp("Juego terminado. ¡Hay un ganador!");
 }
 
-// Manejo de la señal de "chat"
+// Manejo de xla señal de "chat"
 void Room::handleChat(int senderSocket, const ProtocolMessage& msg) {
     if (!msg.data.empty()) {
         string chatMsg = "Jugador dice: " + msg.data[0] + "\n";
@@ -172,26 +178,53 @@ void Room::addSelectedCell(int playerSocket, const std::string&cell ){
 }
 
 // Aplicar el disparo a la celda
-bool Room::applyFire(int attackerSocket, const string& cell) {
+std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
     bool hit = false;
+    bool sunk = false;
 
-    if (attackerSocket == player1_socket) {
-        hit = player2_boats[cell];
-        if (hit) player2_board[cell] = false;
-    } else {
-        hit = player1_boats[cell];
-        if (hit) player1_board[cell] = false;
+    auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
+    auto& opponent_selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
+
+    for (const auto& boat : opponent_boats) {
+        if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
+            hit = true;
+            break;
+        }
     }
 
-    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)"));
-    return hit;
+    if (hit) {
+        opponent_selected_cells.push_back(cell);
+
+        // Revisar si algún barco fue hundido completamente
+        for (const auto& boat : opponent_boats) {
+            bool all_hit = true;
+            for (const auto& part : boat) {
+                if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), part) == opponent_selected_cells.end()) {
+                    all_hit = false;
+                    break;
+                }
+            }
+            if (all_hit && std::find(boat.begin(), boat.end(), cell) != boat.end()) {
+                sunk = true;
+                break;
+            }
+        }
+    }
+
+    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
+    return {hit, sunk};
 }
 
 // Verificar si el jugador ha ganado
 bool Room::checkVictory(int attackerSocket) {
     const auto& board = (attackerSocket == player1_socket) ? player2_board : player1_board;
-    for (const auto& cell : board) {
-        if (cell.second) return false;
+    const auto& selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
+    for (const auto& boat : board) {
+        for (const auto& coord : boat) {
+            if (find(selected_cells.begin(), selected_cells.end(), coord) == selected_cells.end()) {
+                return false; // Coordenada no encontrada
+            }
+        }
     }
     return true;
 }

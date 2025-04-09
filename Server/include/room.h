@@ -16,11 +16,14 @@
 #include <vector>
 #include "protocol.h"
 
+using namespace std;
+
 class Room {
 public:
     Room(int player1_socket, int player2_socket);
     void run();
     void onPlayerMessage(int playerSocket, const ProtocolMessage& msg);
+    void addSelectedCell(int playersocket, const std::string& cell);
     
 
 private:
@@ -35,21 +38,25 @@ private:
     bool player1_ready = false;
     bool player2_ready = false;
 
-    // Tableros de cada jugador: casilla -> bool (true = barco presente)
-    std::map<std::string, bool> player1_board;
-    std::map<std::string, bool> player2_board;
+    // Listado de botes de cada jugador
+    vector<vector<string>> player1_boats;
+    vector<vector<string>> player2_boats;
 
     void waitForPlayersReady();
     void gameLoop();
 
     // Métodos para manejar distintos tipos de mensajes
     
-    void handleReady(int playerSocket, ProtocolMessage& msg);	
+    void handleReady(int playerSocket, const ProtocolMessage& msg);	
     void handleFire(int playerSocket, const ProtocolMessage& msg);
     void handleChat(int senderSocket, const ProtocolMessage& msg);
     void handleVictory(int winnerSocket);
 
     // Auxiliares
-    bool applyFire(int attackerSocket, const std::string& cell);
+    std::pair<bool, bool> applyFire(int attackerSocket, const std::string& cell);
     bool checkVictory(int attackerSocket);
+
+    // Posicionar seleccion de casillas de cada jugador en 1 arreglo
+    std::vector<std::string> player1_selected_cells;
+    std::vector<std::string> player2_selected_cells;
 };
