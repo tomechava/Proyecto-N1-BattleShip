@@ -35,24 +35,15 @@ void Room::run() {
     msg.data.push_back(mensajeJugador);
     string room_joined_msg = createMessage(MessageType::REGISTER, msg.data);
 
-    // Enviar mensaje de registro a ambos jugadores
-    send(player1_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
-    send(player2_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
-
-#ifdef _WIN32   // En Windows, se usa send() directamente
-    send(player1_socket, mensajeJugador1.c_str(), mensajeJugador1.size(), 0);
-    send(player2_socket, mensajeJugador2.c_str(), mensajeJugador2.size(), 0);
-#else   // En Linux, se usa send() con manejo de errores
     // Enviar mensajes a los jugadores
-    ssize_t sent1 = send(player1_socket, mensajeJugador1.c_str(), mensajeJugador1.size(), 0);
+    ssize_t sent1 = send(player1_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
     if (sent1 == -1) {
         perror("Error al enviar mensaje al jugador 1");
     }
-    ssize_t sent2 = send(player2_socket, mensajeJugador2.c_str(), mensajeJugador2.size(), 0);
+    ssize_t sent2 = send(player2_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
     if (sent2 == -1) {
         perror("Error al enviar mensaje al jugador 2");
     }
-#endif
 
     // Iniciar hilos para escuchar mensajes de los jugadores
     std::thread t1([this]() {
