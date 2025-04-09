@@ -9,6 +9,7 @@
 #include <chrono>
 #include <map>
 #include <mutex>
+#include <algorithm>  // Para std::find
 
 using namespace std;
 

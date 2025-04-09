@@ -56,6 +56,7 @@ private:
     // Auxiliares
     std::pair<bool, bool> applyFire(int attackerSocket, const std::string& cell);
     bool checkVictory(int attackerSocket);
+    vector<vector<string>> convertBoats(const vector<string>& data);
 
     // Posicionar seleccion de casillas de cada jugador en 1 arreglo
     std::vector<std::string> player1_selected_cells;
