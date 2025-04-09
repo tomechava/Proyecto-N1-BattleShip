@@ -64,7 +64,7 @@ def main():
                 return  # salir del programa si no hay conexión
 
             # Fase de colocación de barcos
-            own_board, all_ship_positions, ships_list = place_ships()
+            own_board, all_ship_positions, ships_list = place_ships(own_board)
             placed_cells = list(own_board.keys())
             
             print("🛳️ Barcos colocados en el tablero:")
