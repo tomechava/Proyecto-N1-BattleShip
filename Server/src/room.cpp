@@ -127,12 +127,8 @@ void Room::handleReady(int playerSocket, const ProtocolMessage& msg) {
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
     logWithTimestamp("Barcos recibidos (" + to_string((playerSocket == player1_socket ? 1 : 2)) + "):");
-    for (const auto& barco : (playerSocket == player1_socket ? player1_boats : player2_boats)) {
-        for (const auto& celda : barco) {
-            cout << celda << " ";
-        }
-        cout << endl;
-    }
+    playerSocket == player1_socket ? cout << player1_boats : cout << player2_boats;
+    cout << endl;
 }
 
 // Manejo de la señal de "disparar"
@@ -239,7 +235,6 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     }
 
     if (hit) {
-        attacker_selected_cells.push_back(cell);
 
         sunk = true;
         for (const auto& boat_part : boat_found) {
