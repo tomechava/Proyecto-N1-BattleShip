@@ -14,8 +14,6 @@ MessageType stringToMessageType(const string& str) {
     if (str == "SUNK") return MessageType::SUNK;
     if (str == "WIN") return MessageType::WIN;
     if (str == "LOSE") return MessageType::LOSE;
-    if (str == "CHAT") return MessageType::CHAT;
-    
     if (str == "DISCONNECT") return MessageType::DISCONNECT;
     return MessageType::UNKNOWN;
 }
@@ -32,9 +30,7 @@ string messageTypeToString(MessageType type) {
         case MessageType::SUNK: return "SUNK";
         case MessageType::WIN: return "WIN";
         case MessageType::LOSE: return "LOSE";
-        case MessageType::CHAT: return "CHAT";
         case MessageType::DISCONNECT: return "DISCONNECT";
-        
         default: return "UNKNOWN";
     }
 }

@@ -79,10 +79,6 @@ def receive_messages(sock):
             elif msg.type == MessageType.TURN:
                 my_turn = True
                 print("🎯 ¡Es tu turno!")
-            elif msg.type == MessageType.CHAT:
-                print("[Chat] " + ",".join(msg.data))
-            else:
-                print(f"[Mensaje recibido] {msg.to_string()}")
         except Exception as e:
             print(f"❌ Error recibiendo mensaje: {e}")
             game_over = True

@@ -9,7 +9,6 @@ class MessageType(Enum):
     SUNK = "SUNK"
     WIN = "WIN"
     LOSE = "LOSE"
-    CHAT = "CHAT"
     DISCONNECT = "DISCONNECT"
     PLACE = "PLACE"
     UNKNOWN = "UNKNOWN"

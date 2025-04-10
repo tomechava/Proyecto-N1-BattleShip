@@ -113,9 +113,6 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
         case MessageType::FIRE:
             handleFire(playerSocket, msg);
             break;
-        case MessageType::CHAT:
-            handleChat(playerSocket, msg);
-            break;
         default:
             break;
     }
@@ -186,17 +183,9 @@ void Room::handleVictory(int winnerSocket) {
     logWithTimestamp("Juego terminado. ¡Hay un ganador!");
 }
 
-// Manejo de xla señal de "chat"
-void Room::handleChat(int senderSocket, const ProtocolMessage& msg) {
-    if (!msg.data.empty()) {
-        string chatMsg = "Jugador dice: " + msg.data[0] + "\n";
-        int receiverSocket = (senderSocket == player1_socket) ? player2_socket : player1_socket;
-        send(receiverSocket, chatMsg.c_str(), chatMsg.size(), 0);
-    }
-}
 
 // Metodo para agregar las casillas jugadas a un arreglo (individual por cada player)
-void Room::addSelectedCell(int playerSocket, const std::string&cell ){
+void Room::addSelectedCell(int playerSocket, const std::string& cell){
     if (playerSocket == player1_socket){
         player1_selected_cells.push_back(cell);
     }else if (playerSocket == player2_socket){
@@ -204,6 +193,7 @@ void Room::addSelectedCell(int playerSocket, const std::string&cell ){
     }
     
 }
+
 
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
     bool hit = false;
@@ -214,9 +204,11 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
 
     // Verificar si la celda disparada pertenece a algún barco enemigo
     for (const auto& boat : opponent_boats) {
-        if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
-            hit = true;
-            break;
+        for (const auto& boat_part : boat) {
+            if (cell == boat_part) {
+                hit = true;
+                break;
+            }
         }
     }
 
@@ -224,21 +216,28 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
         // Registrar la celda impactada
         opponent_selected_cells.push_back(cell);
 
-        // Verificar si se hundió algún barco
+        boat_found = [];
+        //Hallar el barco que se ha impactado
         for (const auto& boat : opponent_boats) {
-            // Solo verificamos barcos que contienen la celda disparada
-            if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
-                bool all_hit = true;
-                for (const auto& part : boat) {
-                    if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), part) == opponent_selected_cells.end()) {
-                        all_hit = false;
-                        break;
-                    }
+            //recorremos el barco para ver si contiene la celda disparada
+            for (const auto& boat_part : boat) {
+                if (cell == boat_part) {
+                    boat_found = boat;
+                    break;
                 }
-                if (all_hit) {
+            }
+        }
+
+        // Verificar si el barco se hundió
+        for (const auto& boat_part : boat_found) {
+            for (const auto& selected_cell : opponent_selected_cells) {
+                if (boat_part == selected_cell) {
+                    // Si la celda disparada está en el barco, lo marcamos como hundido
                     sunk = true;
+                } else {
+                    sunk = false; // Si no está, no se hundió
+                    break; // Salimos del bucle
                 }
-                break;
             }
         }
     }
