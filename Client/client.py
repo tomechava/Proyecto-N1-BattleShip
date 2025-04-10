@@ -127,8 +127,8 @@ def main():
         log_to_file("Barcos colocados.")
 
         input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        serialized = [",".join(ship) for ship in ships_list]
-        send_message(sock, ProtocolMessage(MessageType.READY, serialized))
+        #serialized = [",".join(ship) for ship in ships_list]
+        send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
         # Esperando READY del oponente
         while True:
