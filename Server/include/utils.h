@@ -13,9 +13,21 @@
     #define CLOSE_SOCKET close
 #endif
 
-
 #include <string>
+#include <vector>
 
 void logWithTimestamp(const std::string& msg);
 
+// Log al archivo por defecto
+void logToFile(const std::string& message);
+
+// Log a archivo específico
 void logToFile(const std::string& file, const std::string& message);
+
+std::string vectorToString(const std::vector<std::string>& vec);
+std::string vectorOfVectorsToString(const std::vector<std::vector<std::string>>& vec);
+
+// Macros para logs separados
+#define LOG_SERVER(msg) logToFile("logs/server.log", msg)
+#define LOG_ROOM(msg)   logToFile("logs/room.log", msg)
+
