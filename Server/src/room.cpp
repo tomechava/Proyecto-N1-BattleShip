@@ -154,8 +154,17 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
 
     string response = createMessage(result, { cell });
 
-    send(current_turn_socket, response.c_str(), response.size(), 0);
-    send(other_player_socket, response.c_str(), response.size(), 0);
+    ssize_t sent = send(other_player_socket, response.c_str(), response.size(), 0);
+    if (sent == -1) {
+        perror("Error al enviar mensaje de disparo al jugador 2");
+    }
+    ssize_t sent2 = send(playerSocket, response.c_str(), response.size(), 0);
+    if (sent2 == -1) {
+        perror("Error al enviar mensaje de disparo al jugador 1");
+    }
+    
+    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
+    // Agregar la celda disparada a la lista de celdas seleccionadas
 
     if (checkVictory(playerSocket)) {
         handleVictory(playerSocket);
@@ -196,7 +205,7 @@ void Room::addSelectedCell(int playerSocket, const std::string& cell){
 
 
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
-    bool hit = false;
+    bool hit = true;
     bool sunk = false;
 
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
