@@ -13,6 +13,7 @@ class MessageType(Enum):
     DISCONNECT = "DISCONNECT"
     PLACE = "PLACE"
     UNKNOWN = "UNKNOWN"
+    TURN = "TURN"
 
 class ProtocolMessage:
     def __init__(self, type_: MessageType, data: list):
