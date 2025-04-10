@@ -242,9 +242,27 @@ bool Room::checkVictory(int attackerSocket) {
     return true;
 }
 
-// Método que maneja el bucle del juego
 void Room::gameLoop() {
-    logWithTimestamp("Loop del juego iniciado. Turnos serán manejados por los mensajes FIRE.");
+    logWithTimestamp("🎮 Iniciando bucle del juego...");
+
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        {
+            std::lock_guard<std::mutex> lock(game_mutex);
+
+            // Si ya hay un ganador, salimos del loop
+            if (checkVictory(player1_socket) || checkVictory(player2_socket)) {
+                break;
+            }
+
+            // En este punto no hacemos nada más, ya que los turnos
+            // y disparos se gestionan desde handleFire.
+            // Solo estamos esperando a que el juego termine.
+        }
+    }
+
+    logWithTimestamp("🏁 Juego finalizado en la sala.");
 }
 
 //Transformar msg de botes a arreglo bidimensional
