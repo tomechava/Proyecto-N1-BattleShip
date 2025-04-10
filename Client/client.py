@@ -136,7 +136,9 @@ def main():
                     game_over = True
                     break
             else:
-                time.sleep(0.1)
+                print("⏳ Esperando tu turno...")
+                time.sleep(1)
+
 
     except Exception as e:
         print(f"❌ Ocurrió un error inesperado: {e}")
