@@ -17,3 +17,5 @@
 #include <string>
 
 void logWithTimestamp(const std::string& msg);
+
+void logToFile(const std::string& file, const std::string& message);

@@ -85,4 +85,9 @@ def save_board_to_file(board, filename, title="Tablero", show_ships=True):
             f.write(line + "\n")
             
 
-    
+import datetime
+
+def log_to_file(message: str, file: str = "client_log.txt"):
+    timestamp = datetime.datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
+    with open(file, "a") as f:
+        f.write(f"{timestamp} {message}\n")
