@@ -127,7 +127,7 @@ def main():
         log_to_file("Barcos colocados.")
 
         input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        send_message(sock, ProtocolMessage(MessageType.READY, f"{ships_list}"))
+        send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
         # Esperando READY del oponente
         while True:
