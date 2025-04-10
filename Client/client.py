@@ -136,7 +136,6 @@ def main():
                     game_over = True
                     break
             else:
-                print("⏳ Esperando tu turno...")
                 time.sleep(1)
 
 
