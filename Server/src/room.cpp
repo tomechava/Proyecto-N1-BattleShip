@@ -170,7 +170,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    addSelectedCell(playerSocket, cell + " ''");  // Agregar la celda disparada a la lista de celdas seleccionadas
+    addSelectedCell(playerSocket, cell);  // Agregar la celda disparada a la lista de celdas seleccionadas
     LOG_ROOM("Celda " + cell + " agregada a la lista de disparos del jugador.");
     LOG_ROOM("Lista de disparos actualizada: " + vectorToString(playerSocket == player1_socket ? player1_selected_cells : player2_selected_cells));
 
@@ -329,25 +329,47 @@ void Room::gameLoop() {
 }
 
 //Transformar msg de botes a arreglo bidimensional
-vector<vector<string>> Room::convertBoats(const vector<string>& data) {
+vector<vector<string>> Room::convertBoats(const string& data) {
     vector<vector<string>> resultado;
 
     LOG_ROOM("Convirtiendo barcos a formato de arreglo bidimensional.");
-    LOG_ROOM("Datos de barcos: " + vectorToString(data));
-    logWithTimestamp("Datos de barcos: " + vectorToString(data));
+    LOG_ROOM("Datos de barcos: " + data);
+    logWithTimestamp("Datos de barcos: " + data);
 
-    for (const string& grupo : data) {
-        vector<string> subgrupo;
-        stringstream ss(grupo);
-        string token;
+    string cleaned = data;
 
-        while (getline(ss, token, ',')) {
-            subgrupo.push_back(token);
-        }
-
-        resultado.push_back(subgrupo);
+    // Eliminar corchetes exteriores
+    if (!cleaned.empty() && cleaned.front() == '[' && cleaned.back() == ']') {
+        cleaned = cleaned.substr(1, cleaned.size() - 2);
     }
+
+    string sublist;
+    bool insideSublist = false;
+
+    for (char c : cleaned) {
+        if (c == '[') {
+            insideSublist = true;
+            sublist.clear();
+        } else if (c == ']') {
+            insideSublist = false;
+
+            // Procesar sublista (separar por comas)
+            vector<string> grupo;
+            stringstream ss(sublist);
+            string token;
+
+            while (getline(ss, token, ',')) {
+                grupo.push_back(token);
+            }
+
+            resultado.push_back(grupo);
+        } else if (insideSublist) {
+            sublist += c;
+        }
+    }
+
     LOG_ROOM("Barcos convertidos: " + vectorOfVectorsToString(resultado));
     logWithTimestamp("Barcos convertidos: " + vectorOfVectorsToString(resultado));
+
     return resultado;
 }
