@@ -5,7 +5,7 @@ from placement import place_ships
 from utils import print_board, create_empty_board, log_to_file  # 👈 NUEVO
 import time
 
-HOST = '54.158.123.246'
+HOST = '3.83.154.199'
 PORT = 8080
 
 own_board = create_empty_board()
