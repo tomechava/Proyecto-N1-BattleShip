@@ -143,7 +143,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    auto {hit, sunk} = applyFire(playerSocket, cell);
+    auto [hit, sunk] = applyFire(playerSocket, cell);  // Destructuración válida
 
     MessageType result;
     if (sunk) {
@@ -151,35 +151,40 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     } else {
         result = hit ? MessageType::HIT : MessageType::MISS;
     }
+
     cout << "Resultado del disparo: " << (hit ? "HIT" : "MISS") << endl;
 
     string response = createMessage(result, { cell });
 
-    ssize_t sent = send(other_player_socket, response.c_str(), response.size(), 0);
-    if (sent == -1) {
-        perror("Error al enviar mensaje de disparo al jugador 2");
+    // Enviar el resultado a ambos jugadores
+    if (send(playerSocket, response.c_str(), response.size(), 0) == -1) {
+        perror("Error al enviar al jugador que disparó");
     }
-    ssize_t sent2 = send(playerSocket, response.c_str(), response.size(), 0);
-    if (sent2 == -1) {
-        perror("Error al enviar mensaje de disparo al jugador 1");
+    if (send(other_player_socket, response.c_str(), response.size(), 0) == -1) {
+        perror("Error al enviar al jugador objetivo");
     }
-    
+
     logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
-    // Agregar la celda disparada a la lista de celdas seleccionadas
 
-    if (checkVictory(playerSocket)) {
-        handleVictory(playerSocket);
-    } else {
-        // Cambiar turno
-        swap(current_turn_socket, other_player_socket);
-
-        // Enviar mensaje TURN al nuevo jugador en turno
-        ProtocolMessage turn_msg = { MessageType::TURN, {"Es tu turno."} };
-        string msg_str = createMessage(turn_msg.type, turn_msg.data);
-        send(current_turn_socket, msg_str.c_str(), msg_str.size(), 0);
-        logWithTimestamp("Turno cambiado.");
+    // Verifica si el oponente ha perdido
+    if (checkVictory(other_player_socket)) {
+        handleVictory(playerSocket);  // playerSocket gana
+        return;
     }
+
+    // Cambiar turno
+    swap(current_turn_socket, other_player_socket);
+
+    // Enviar mensaje TURN al nuevo jugador
+    ProtocolMessage turn_msg = { MessageType::TURN, {"Es tu turno."} };
+    string msg_str = createMessage(turn_msg.type, turn_msg.data);
+    if (send(current_turn_socket, msg_str.c_str(), msg_str.size(), 0) == -1) {
+        perror("Error al enviar mensaje de turno");
+    }
+
+    logWithTimestamp("Turno cambiado.");
 }
+
 
 // Manejo de la señal de "victoria"
 void Room::handleVictory(int winnerSocket) {
@@ -206,8 +211,8 @@ void Room::addSelectedCell(int playerSocket, const std::string& cell){
 
 
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
-    bool hit_f = false;
-    bool sunk_f = false;
+    bool hit = false;
+    bool sunk = false;
 
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
     auto& attacker_selected_cells = (attackerSocket == player1_socket) ? player1_selected_cells : player2_selected_cells;
@@ -217,29 +222,28 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     for (const auto& boat : opponent_boats) {
         for (const auto& boat_part : boat) {
             if (cell == boat_part) {
-                hit_f = true;
+                hit = true;
                 boat_found = boat;
                 break;
             }
         }
-        if (hit_f) break;
+        if (hit) break;
     }
 
-    if (hit_f) {
+    if (hit) {
         attacker_selected_cells.push_back(cell);
-        logWithTimestamp("Las celdas que ha disparado este jugador son: " + str(attacker_selected_cells));
 
-        sunk_f = true;
+        sunk = true;
         for (const auto& boat_part : boat_found) {
             if (find(attacker_selected_cells.begin(), attacker_selected_cells.end(), boat_part) == attacker_selected_cells.end()) {
-                sunk_f = false;
+                sunk = false;
                 break;
             }
         }
     }
 
-    logWithTimestamp("Jugador disparó a " + cell + (hit_f ? " (HIT)" : " (MISS)") + (sunk_f ? " (SUNK)" : ""));
-    return {hit_f, sunk_f};
+    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
+    return {hit, sunk};
 }
 
 
