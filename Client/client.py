@@ -61,97 +61,91 @@ def receive_messages(sock):
 
 
 def main():
-    global own_board
+    global own_board, game_over, my_turn
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(5)  # tiempo de espera para intentar conectar
+        sock.settimeout(5)  # tiempo de espera para intentar conectar
+        try:
+            sock.connect((HOST, PORT))
+            print("✅ Conectado al servidor.")
+        except (socket.timeout, ConnectionRefusedError, OSError) as e:
+            print(f"❌ No se pudo conectar al servidor en {HOST}:{PORT}.")
+            print(f"Detalles del error: {e}")
+            return  # salir del programa si no hay conexión
+
+        # Establece timeout de 60 segundos para el socket
+        sock.settimeout(60)
+
+        # Espera en Loop mientras se le une a una ROOM
+        while True:
             try:
-                sock.connect((HOST, PORT))
-                print("✅ Conectado al servidor.")
-            except (socket.timeout, ConnectionRefusedError, OSError) as e:
-                print(f"❌ No se pudo conectar al servidor en {HOST}:{PORT}.")
-                print(f"Detalles del error: {e}")
-                return  # salir del programa si no hay conexión
-            
-            # Establece timeout de 60 segundos para el socket
-            sock.settimeout(60)
+                raw = sock.recv(1024).decode().strip()
+                if not raw:
+                    print("❌ Desconectado del servidor.")
+                    return
+                msg = ProtocolMessage.from_string(raw)
+                if msg.type == MessageType.REGISTER:
+                    print(f"📦 Te has unido a la sala: {msg.data[0]}")
+                    break
+            except Exception as e:
+                print(f"❌ Error recibiendo mensaje: {e}")
+                continue
 
-            # Espera en Loop mientras se le une a una ROOM
-            while True:
+        # Fase de colocación de barcos
+        own_board, all_ship_positions, ships_list = place_ships(own_board)
+        placed_cells = list(own_board.keys())
+
+        print("🛳️ Barcos colocados en el tablero:")
+        print_board(own_board)
+
+        input("Presiona ENTER cuando estés listo para comenzar el juego.")
+        send_message(sock, ProtocolMessage(MessageType.READY, str(ships_list)))
+
+        # Espera en Loop mientras oponente pone LISTO
+        while True:
+            try:
+                raw = sock.recv(1024).decode().strip()
+                if not raw:
+                    print("❌ Desconectado del servidor.")
+                    return
+                msg = ProtocolMessage.from_string(raw)
+                if msg.type == MessageType.READY:
+                    print(f"📦 El oponente está listo. Comienza el juego.")
+                    break
+            except Exception as e:
+                print(f"❌ Error recibiendo mensaje: {e}")
+                continue
+
+        # Inicia el hilo para recibir mensajes
+        threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
+
+        # Loop principal de juego (turnos)
+        while not game_over:
+            if my_turn:
                 try:
-                    raw = sock.recv(1024).decode().strip()
-                    if not raw:
-                        print("❌ Desconectado del servidor.")
-                        break
-                    msg = ProtocolMessage.from_string(raw)
-                    if msg.type == MessageType.REGISTER:
-                        print(f"📦 Te has unido a la sala: {msg.data[0]}")
-                        break
-                
-                except Exception as e:
-                    print(f"❌ Error recibiendo mensaje: {e}")
-                    try:
-                        pass
-                    except socket.timeout:
-                        print("⏰ Tiempo de espera agotado. No se pudo unir a una sala en 60 segundos.")
-                        break
-                
-            # Fase de colocación de barcos
-            own_board, all_ship_positions, ships_list = place_ships(own_board)
-            placed_cells = list(own_board.keys())
-            
-            print("🛳️ Barcos colocados en el tablero:")
-            print_board(own_board)
+                    cell = input("📍 Tu turno. Coordenada a disparar (ej: A5): ").upper()
+                    if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
+                        print("❗ Formato inválido.")
+                        continue
+                    send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
+                    my_turn = False  # Esperamos al próximo TURN
+                except (KeyboardInterrupt, EOFError):
+                    print("👋 Saliendo del juego...")
+                    game_over = True
+                    break
+            else:
+                time.sleep(0.1)
 
-            input("Presiona ENTER cuando estés listo para comenzar el juego.")
-            send_message(sock, ProtocolMessage(MessageType.READY, str(ships_list)))
-
-             # Espera en Loop mientras oponente pone LISTO
-            while True:
-                try:
-                    raw = sock.recv(1024).decode().strip()
-                    if not raw:
-                        print("❌ Desconectado del servidor.")
-                        break
-                    msg = ProtocolMessage.from_string(raw)
-                    if msg.type == MessageType.READY:
-                        print(f"📦 El oponente está listo. Comienza el juego.")
-                        break
-                
-                except Exception as e:
-                    print(f"❌ Error recibiendo mensaje: {e}")
-                    try:
-                        pass
-                    except socket.timeout:
-                        print("⏰ Tiempo de espera agotado. El oponente no está listo.")
-                        break
-            
-            
-            # Inicia el hilo para recibir mensajes
-            threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
-
-            # Loop principal de juego (turnos)
-            while not game_over:
-                if my_turn:
-                    try:
-                        cell = input("📍 Tu turno. Coordenada a disparar (ej: A5): ").upper()
-                        if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
-                            print("❗ Formato inválido.")
-                            continue
-                        send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
-                        my_turn = False  # Esperamos al próximo TURN
-                    except (KeyboardInterrupt, EOFError):
-                        print("👋 Saliendo del juego...")
-                        game_over = True
-                        break
-                else:
-                    # Esperamos un poco antes de volver a chequear
-                    time.sleep(0.1)
-                
-                
     except Exception as e:
         print(f"❌ Ocurrió un error inesperado: {e}")
+
+    finally:
+        try:
+            sock.close()
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()
