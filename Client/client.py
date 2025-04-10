@@ -126,7 +126,9 @@ def main():
         print_board(own_board)
 
         input("Presiona ENTER cuando estés listo para comenzar el juego.")
-        send_message(sock, ProtocolMessage(MessageType.READY, str(ships_list)))
+        # Enviar los barcos como strings: ["A1,A2,A3", "B1,B2"]
+        serialized = [",".join(ship) for ship in ships_list]
+        send_message(sock, ProtocolMessage(MessageType.READY, serialized))
 
         # Espera en Loop mientras oponente pone LISTO
         while True:
