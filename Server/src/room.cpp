@@ -56,6 +56,18 @@ void Room::run() {
     // Esperar que ambos jugadores estén listos
     waitForPlayersReady();
 
+    // Enviar mensaje de inicio a ambos jugadores
+    ProtocolMessage start_msg = { MessageType::READY, {} };
+    string start_message = createMessage(MessageType::READY, start_msg.data);
+    ssize_t sent_start1 = send(player1_socket, start_message.c_str(), start_message.size(), 0);
+    if (sent_start1 == -1) {
+        perror("Error al enviar mensaje de inicio al jugador 1");
+    }
+    ssize_t sent_start2 = send(player2_socket, start_message.c_str(), start_message.size(), 0);
+    if (sent_start2 == -1) {
+        perror("Error al enviar mensaje de inicio al jugador 2");
+    }
+
     logWithTimestamp("Ambos jugadores listos. ¡Comienza el juego!");
 
     current_turn_socket = player2_socket; // por ejemplo, el player 2 comienza

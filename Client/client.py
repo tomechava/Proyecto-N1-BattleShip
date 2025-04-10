@@ -96,6 +96,27 @@ def main():
             input("Presiona ENTER cuando estés listo para comenzar el juego.")
             send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
 
+             # Espera en Loop mientras oponente pone LISTO
+            while True:
+                try:
+                    raw = sock.recv(1024).decode().strip()
+                    if not raw:
+                        print("❌ Desconectado del servidor.")
+                        break
+                    msg = ProtocolMessage.from_string(raw)
+                    if msg.type == MessageType.READY:
+                        print(f"📦 El oponente está listo. Comienza el juego.")
+                        break
+                
+                except Exception as e:
+                    print(f"❌ Error recibiendo mensaje: {e}")
+                    try:
+                        pass
+                    except socket.timeout:
+                        print("⏰ Tiempo de espera agotado. El oponente no está listo.")
+                        break
+            
+            
             # Inicia el hilo para recibir mensajes
             threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
 
@@ -110,6 +131,8 @@ def main():
                 except (KeyboardInterrupt, EOFError):
                     print("👋 Saliendo del juego...")
                     break
+                
+                
     except Exception as e:
         print(f"❌ Ocurrió un error inesperado: {e}")
 
