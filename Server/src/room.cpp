@@ -143,6 +143,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
+    addSelectedCell(playerSocket, cell);  // Agregar la celda disparada a la lista de celdas seleccionadas
     auto [hit, sunk] = applyFire(playerSocket, cell);  // Destructuración válida
 
     MessageType result;
