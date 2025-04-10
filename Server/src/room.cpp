@@ -143,7 +143,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    auto [hit, sunk] = applyFire(playerSocket, cell);
+    auto {hit, sunk} = applyFire(playerSocket, cell);
 
     MessageType result;
     if (sunk) {
@@ -206,47 +206,42 @@ void Room::addSelectedCell(int playerSocket, const std::string& cell){
 
 
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
-    bool hit = false;
-    bool sunk = false;
+    bool hit_f = false;
+    bool sunk_f = false;
 
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
-    auto& opponent_selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
+    auto& attacker_selected_cells = (attackerSocket == player1_socket) ? player1_selected_cells : player2_selected_cells;
 
-    vector<string> boat_found;  // ← esto estaba mal antes
+    vector<string> boat_found;
 
-    // Verificar si la celda disparada pertenece a algún barco enemigo
     for (const auto& boat : opponent_boats) {
         for (const auto& boat_part : boat) {
             if (cell == boat_part) {
-                hit = true;
-                boat_found = boat;  // ← ahora sí asignamos correctamente el barco impactado
+                hit_f = true;
+                boat_found = boat;
                 break;
             }
         }
-        if (hit) break;  // salimos del bucle si ya dimos con el barco
+        if (hit_f) break;
     }
 
-    if (hit) {
-        // Registrar la celda impactada
-        opponent_selected_cells.push_back(cell);
-        logWithTimestamp("Las celdas que se han disparado son: " + str(opponent_selected_cells));
+    if (hit_f) {
+        attacker_selected_cells.push_back(cell);
+        logWithTimestamp("Las celdas que ha disparado este jugador son: " + str(attacker_selected_cells));
 
-        // Verificar si el barco se hundió
-        sunk = false;        //inicializamos como hundido
+        sunk_f = true;
         for (const auto& boat_part : boat_found) {
-            //verificamos que todas las partes del barco hayan sido disparadas
-            if (find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
-                sunk = false; // Si no se encuentra una parte del barco, no está hundido
+            if (find(attacker_selected_cells.begin(), attacker_selected_cells.end(), boat_part) == attacker_selected_cells.end()) {
+                sunk_f = false;
                 break;
-            } else {
-                sunk = true;  // Si todas las partes están disparadas, el barco está hundido
             }
         }
     }
 
-    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
-    return {hit, sunk};
+    logWithTimestamp("Jugador disparó a " + cell + (hit_f ? " (HIT)" : " (MISS)") + (sunk_f ? " (SUNK)" : ""));
+    return {hit_f, sunk_f};
 }
+
 
 
 // Verificar si el jugador ha ganado
