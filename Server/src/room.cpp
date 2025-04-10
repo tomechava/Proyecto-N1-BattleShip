@@ -263,11 +263,10 @@ void Room::gameLoop() {
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        {
-            std::lock_guard<std::mutex> lock(game_mutex);
+        std::lock_guard<std::mutex> lock(game_mutex);
 
             // Si ya hay un ganador, salimos del loop
-            if (checkVictory(player1_socket));
+            if (checkVictory(player1_socket)){
                 handleVictory(player1_socket);
                 break;
             } else if (checkVictory(player2_socket)) {
