@@ -202,42 +202,30 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
     auto& opponent_selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
 
+    vector<string> boat_found;  // ← esto estaba mal antes
+
     // Verificar si la celda disparada pertenece a algún barco enemigo
     for (const auto& boat : opponent_boats) {
         for (const auto& boat_part : boat) {
             if (cell == boat_part) {
                 hit = true;
+                boat_found = boat;  // ← ahora sí asignamos correctamente el barco impactado
                 break;
             }
         }
+        if (hit) break;  // salimos del bucle si ya dimos con el barco
     }
 
     if (hit) {
         // Registrar la celda impactada
         opponent_selected_cells.push_back(cell);
 
-        boat_found = [];
-        //Hallar el barco que se ha impactado
-        for (const auto& boat : opponent_boats) {
-            //recorremos el barco para ver si contiene la celda disparada
-            for (const auto& boat_part : boat) {
-                if (cell == boat_part) {
-                    boat_found = boat;
-                    break;
-                }
-            }
-        }
-
         // Verificar si el barco se hundió
+        sunk = true;
         for (const auto& boat_part : boat_found) {
-            for (const auto& selected_cell : opponent_selected_cells) {
-                if (boat_part == selected_cell) {
-                    // Si la celda disparada está en el barco, lo marcamos como hundido
-                    sunk = true;
-                } else {
-                    sunk = false; // Si no está, no se hundió
-                    break; // Salimos del bucle
-                }
+            if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
+                sunk = false;
+                break;
             }
         }
     }
@@ -245,6 +233,7 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
     return {hit, sunk};
 }
+
 
 // Verificar si el jugador ha ganado
 bool Room::checkVictory(int attackerSocket) {
