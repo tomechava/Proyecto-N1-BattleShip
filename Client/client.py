@@ -94,7 +94,7 @@ def main():
             print_board(own_board)
 
             input("Presiona ENTER cuando estés listo para comenzar el juego.")
-            send_message(sock, ProtocolMessage(MessageType.READY, ships_list))
+            send_message(sock, ProtocolMessage(MessageType.READY, str(ships_list)))
 
              # Espera en Loop mientras oponente pone LISTO
             while True:
