@@ -40,6 +40,8 @@ def receive_messages(sock):
                     own_board[cell] = 'X'
                 print_board(enemy_board, "Tablero Enemigo", False)    
                 print_board(own_board, "Tu Tablero", True)
+                if my_turn:
+                    my_turn = False
             elif msg.type == MessageType.MISS:
                 if my_turn:
                     print("💧 Fallo.")
@@ -51,6 +53,8 @@ def receive_messages(sock):
                     own_board[cell] = 'O'
                 print_board(enemy_board, "Tablero Enemigo", False)
                 print_board(own_board, "Tu Tablero", True)
+                if my_turn:
+                    my_turn = False
             elif msg.type == MessageType.SUNK:
                 if my_turn:
                     print("💥 ¡Barco hundido del enemigo!")
@@ -62,6 +66,8 @@ def receive_messages(sock):
                     own_board[cell] = 'X'
                 print_board(enemy_board, "Tablero Enemigo", False)
                 print_board(own_board, "Tu Tablero", True)
+                if my_turn:
+                    my_turn = False
             elif msg.type == MessageType.WIN:
                 print("🏆 ¡Has ganado!")
                 game_over = True
@@ -154,13 +160,6 @@ def main():
                         continue
                     send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
                     print(f"📍 Disparando a {cell}...")
-                    # Espera a recibir el resultado del disparo
-                    while not game_over and my_turn:
-                        time.sleep(3)
-                    if game_over:
-                        print("🏁 Fin del juego.")
-                        break
-                    my_turn = False  # Esperamos al próximo TURN
                 except (KeyboardInterrupt, EOFError):
                     print("👋 Saliendo del juego...")
                     game_over = True
