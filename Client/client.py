@@ -3,6 +3,7 @@ import threading
 from protocol import ProtocolMessage, MessageType
 from placement import place_ships, generate_coordinates, is_valid_coordinate
 from utils import print_board, create_empty_board
+import time
 
 HOST = '54.173.19.229' # poner tu direccion propia de ip dependiendo de la instancia que se abra
 PORT = 8080
@@ -11,16 +12,20 @@ PORT = 8080
 own_board = create_empty_board()
 enemy_board = create_empty_board()
 
+game_over = False
+my_turn = False
+
 def send_message(sock, msg: ProtocolMessage):
     sock.sendall((msg.to_string() + "\n").encode())
 
 def receive_messages(sock):
-    global enemy_board
+    global enemy_board, game_over, my_turn
     while True:
         try:
             raw = sock.recv(1024).decode().strip()
             if not raw:
-                print("Desconectado del servidor.")
+                print("❌ Desconectado del servidor.")
+                game_over = True
                 break
 
             msg = ProtocolMessage.from_string(raw)
@@ -36,16 +41,22 @@ def receive_messages(sock):
                 print_board(enemy_board, "Enemigo", False)
             elif msg.type == MessageType.WIN:
                 print("🏆 ¡Has ganado!")
+                game_over = True
                 break
             elif msg.type == MessageType.LOSE:
                 print("💀 Has perdido.")
+                game_over = True
                 break
+            elif msg.type == MessageType.TURN:
+                my_turn = True
+                print("🎯 ¡Es tu turno!")
             elif msg.type == MessageType.CHAT:
                 print("[Chat] " + ",".join(msg.data))
             else:
                 print(f"[Mensaje recibido] {msg.to_string()}")
         except Exception as e:
-            print(f"Error recibiendo mensaje: {e}")
+            print(f"❌ Error recibiendo mensaje: {e}")
+            game_over = True
             break
 
 
@@ -120,17 +131,23 @@ def main():
             # Inicia el hilo para recibir mensajes
             threading.Thread(target=receive_messages, args=(sock,), daemon=True).start()
 
-            # Loop de turnos del jugador
-            while True:
-                try:
-                    cell = input("📍 Coordenada a disparar (ej: A5): ").upper()
-                    if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
-                        print("❗ Formato inválido.")
-                        continue
-                    send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
-                except (KeyboardInterrupt, EOFError):
-                    print("👋 Saliendo del juego...")
-                    break
+            # Loop principal de juego (turnos)
+            while not game_over:
+                if my_turn:
+                    try:
+                        cell = input("📍 Tu turno. Coordenada a disparar (ej: A5): ").upper()
+                        if len(cell) < 2 or not cell[0].isalpha() or not cell[1:].isdigit():
+                            print("❗ Formato inválido.")
+                            continue
+                        send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
+                        my_turn = False  # Esperamos al próximo TURN
+                    except (KeyboardInterrupt, EOFError):
+                        print("👋 Saliendo del juego...")
+                        game_over = True
+                        break
+                else:
+                    # Esperamos un poco antes de volver a chequear
+                    time.sleep(0.1)
                 
                 
     except Exception as e:

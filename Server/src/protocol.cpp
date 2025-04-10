@@ -7,6 +7,7 @@ using namespace std; //para evitar repetir  en cada uso
 MessageType stringToMessageType(const string& str) {
     if (str == "REGISTER") return MessageType::REGISTER;
     if (str == "READY") return MessageType::READY;
+    if (str == "TURN") return MessageType::TURN;
     if (str == "FIRE") return MessageType::FIRE;
     if (str == "HIT") return MessageType::HIT;
     if (str == "MISS") return MessageType::MISS;
@@ -24,6 +25,7 @@ string messageTypeToString(MessageType type) {
     switch (type) {
         case MessageType::REGISTER: return "REGISTER";
         case MessageType::READY: return "READY";
+        case MessageType::TURN: return "TURN";
         case MessageType::FIRE: return "FIRE";
         case MessageType::HIT: return "HIT";
         case MessageType::MISS: return "MISS";

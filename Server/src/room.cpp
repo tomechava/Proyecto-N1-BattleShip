@@ -73,6 +73,14 @@ void Room::run() {
     current_turn_socket = player2_socket; // por ejemplo, el player 2 comienza
     other_player_socket = player1_socket;
 
+    // Enviar mensaje TURN al jugador que comienza
+    ProtocolMessage turn_msg = { MessageType::TURN, {"Es tu turno."} };
+    string msg_str = createMessage(turn_msg.type, turn_msg.data);
+    ssize_t sent_turn = send(current_turn_socket, msg_str.c_str(), msg_str.size(), 0);
+    if (sent_turn == -1) {
+        perror("Error al enviar mensaje de turno al jugador 1");
+    }
+
     gameLoop();
 
     // Esperamos que ambos terminen
@@ -155,7 +163,14 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     if (checkVictory(playerSocket)) {
         handleVictory(playerSocket);
     } else {
+        // Cambiar turno
         swap(current_turn_socket, other_player_socket);
+
+        // Enviar mensaje TURN al nuevo jugador en turno
+        ProtocolMessage turn_msg = { MessageType::TURN, {"Es tu turno."} };
+        string msg_str = createMessage(turn_msg.type, turn_msg.data);
+        send(current_turn_socket, msg_str.c_str(), msg_str.size(), 0);
+        logWithTimestamp("Turno cambiado.");
     }
 }
 

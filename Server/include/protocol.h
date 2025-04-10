@@ -11,6 +11,7 @@ using namespace std; //para evitar repetir  en cada uso
 enum class MessageType {    //define los tipos de mensajes que se pueden enviar
     REGISTER,
     READY,
+    TURN,
     FIRE,
     HIT,
     MISS,
