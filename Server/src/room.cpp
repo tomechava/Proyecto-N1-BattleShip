@@ -205,7 +205,6 @@ void Room::addSelectedCell(int playerSocket, const std::string&cell ){
     
 }
 
-// Aplicar el disparo a la celda
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
     bool hit = false;
     bool sunk = false;
@@ -213,6 +212,7 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
     auto& opponent_selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
 
+    // Verificar si la celda disparada pertenece a algún barco enemigo
     for (const auto& boat : opponent_boats) {
         if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
             hit = true;
@@ -221,19 +221,23 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     }
 
     if (hit) {
+        // Registrar la celda impactada
         opponent_selected_cells.push_back(cell);
 
-        // Revisar si algún barco fue hundido completamente
+        // Verificar si se hundió algún barco
         for (const auto& boat : opponent_boats) {
-            bool all_hit = true;
-            for (const auto& part : boat) {
-                if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), part) == opponent_selected_cells.end()) {
-                    all_hit = false;
-                    break;
+            // Solo verificamos barcos que contienen la celda disparada
+            if (std::find(boat.begin(), boat.end(), cell) != boat.end()) {
+                bool all_hit = true;
+                for (const auto& part : boat) {
+                    if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), part) == opponent_selected_cells.end()) {
+                        all_hit = false;
+                        break;
+                    }
                 }
-            }
-            if (all_hit && std::find(boat.begin(), boat.end(), cell) != boat.end()) {
-                sunk = true;
+                if (all_hit) {
+                    sunk = true;
+                }
                 break;
             }
         }

@@ -30,15 +30,38 @@ def receive_messages(sock):
 
             msg = ProtocolMessage.from_string(raw)
             if msg.type == MessageType.HIT:
-                print("🔥 ¡Impacto!")
-                cell = msg.data[0]
-                enemy_board[cell] = 'X'
-                print_board(enemy_board, "Enemigo", False)
+                if my_turn:
+                    print("🔥 ¡Impacto!")
+                    cell = msg.data[0]
+                    enemy_board[cell] = 'X'
+                else:
+                    print("🔥 ¡Impacto en tu barco!")
+                    cell = msg.data[0]
+                    own_board[cell] = 'X'
+                print_board(enemy_board, "Tablero Enemigo", False)    
+                print_board(own_board, "Tu Tablero", True)
             elif msg.type == MessageType.MISS:
-                print("💨 Fallaste.")
-                cell = msg.data[0]
-                enemy_board[cell] = 'O'
-                print_board(enemy_board, "Enemigo", False)
+                if my_turn:
+                    print("💧 Fallo.")
+                    cell = msg.data[0]
+                    enemy_board[cell] = 'O'
+                else:
+                    print("💧 Fallo en tu barco.")
+                    cell = msg.data[0]
+                    own_board[cell] = 'O'
+                print_board(enemy_board, "Tablero Enemigo", False)
+                print_board(own_board, "Tu Tablero", True)
+            elif msg.type == MessageType.SUNK:
+                if my_turn:
+                    print("💥 ¡Barco hundido del enemigo!")
+                    cell = msg.data[0]
+                    enemy_board[cell] = 'X'
+                else:
+                    print("💥 ¡Tu barco ha sido hundido!")
+                    cell = msg.data[0]
+                    own_board[cell] = 'X'
+                print_board(enemy_board, "Tablero Enemigo", False)
+                print_board(own_board, "Tu Tablero", True)
             elif msg.type == MessageType.WIN:
                 print("🏆 ¡Has ganado!")
                 game_over = True
