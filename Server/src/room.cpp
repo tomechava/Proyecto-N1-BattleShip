@@ -127,8 +127,7 @@ void Room::handleReady(int playerSocket, const ProtocolMessage& msg) {
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
     logWithTimestamp("Barcos recibidos (" + to_string((playerSocket == player1_socket ? 1 : 2)) + "):");
-    playerSocket == player1_socket ? cout << player1_boats : cout << player2_boats;
-    cout << endl;
+    logWithTimestamp("Barcos: " + to_string(playerSocket == player1_socket ? player1_boats : player2_boats));
 }
 
 // Manejo de la señal de "disparar"
