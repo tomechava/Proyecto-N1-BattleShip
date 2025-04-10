@@ -153,6 +153,13 @@ def main():
                         print("❗ Formato inválido.")
                         continue
                     send_message(sock, ProtocolMessage(MessageType.FIRE, [cell]))
+                    print(f"📍 Disparando a {cell}...")
+                    # Espera a recibir el resultado del disparo
+                    while not game_over and my_turn:
+                        time.sleep(3)
+                    if game_over:
+                        print("🏁 Fin del juego.")
+                        break
                     my_turn = False  # Esperamos al próximo TURN
                 except (KeyboardInterrupt, EOFError):
                     print("👋 Saliendo del juego...")
