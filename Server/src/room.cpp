@@ -229,13 +229,17 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     if (hit) {
         // Registrar la celda impactada
         opponent_selected_cells.push_back(cell);
+        logWithTimestamp("Las celdas que se han disparado son: " + str(opponent_selected_cells));
 
         // Verificar si el barco se hundió
-        sunk = true;        //inicializamos como hundido
+        sunk = false;        //inicializamos como hundido
         for (const auto& boat_part : boat_found) {
-            if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
-                sunk = false;       //si no se encuentra la parte del barco en las celdas seleccionadas, no está hundido
+            //verificamos que todas las partes del barco hayan sido disparadas
+            if (find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
+                sunk = false; // Si no se encuentra una parte del barco, no está hundido
                 break;
+            } else {
+                sunk = true;  // Si todas las partes están disparadas, el barco está hundido
             }
         }
     }
