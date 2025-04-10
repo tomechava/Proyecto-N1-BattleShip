@@ -21,6 +21,7 @@ Room::Room(int player1_socket, int player2_socket)
 // Método que ejecuta la sala de juego
 void Room::run() {
     logWithTimestamp("Room creada entre dos jugadores.");
+    LOG_ROOM("Room creada entre dos jugadores.");
 
     // Inicializa los estados
     player1_ready = false;
@@ -38,11 +39,19 @@ void Room::run() {
     // Enviar mensajes a los jugadores
     ssize_t sent1 = send(player1_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
     if (sent1 == -1) {
-        perror("Error al enviar mensaje al jugador 1");
+        perror("Error al enviar mensaje REGISTER al jugador 1");
+        LOG_ROOM("Error al enviar mensaje REGISTER al jugador 1");
+    } else {
+        logWithTimestamp("Mensaje REGISTER enviado al jugador 1.");
+        LOG_ROOM(room_joined_msg + " enviado al jugador 1.");
     }
     ssize_t sent2 = send(player2_socket, room_joined_msg.c_str(), room_joined_msg.size(), 0);
     if (sent2 == -1) {
-        perror("Error al enviar mensaje al jugador 2");
+        perror("Error al enviar mensaje REGISTER al jugador 2");
+        LOG_ROOM("Error al enviar mensaje REGISTER al jugador 2");
+    } else {
+        logWithTimestamp("Mensaje REGISTER enviado al jugador 2.");
+        LOG_ROOM(room_joined_msg + " enviado al jugador 2.");
     }
 
     // Iniciar hilos para escuchar mensajes de los jugadores
@@ -62,13 +71,22 @@ void Room::run() {
     ssize_t sent_start1 = send(player1_socket, start_message.c_str(), start_message.size(), 0);
     if (sent_start1 == -1) {
         perror("Error al enviar mensaje de inicio al jugador 1");
+        LOG_ROOM("Error al enviar mensaje de inicio al jugador 1");
+    } else {
+        logWithTimestamp("Mensaje de inicio enviado al jugador 1.");
+        LOG_ROOM(start_message + " enviado al jugador 1.");
     }
     ssize_t sent_start2 = send(player2_socket, start_message.c_str(), start_message.size(), 0);
     if (sent_start2 == -1) {
         perror("Error al enviar mensaje de inicio al jugador 2");
+        LOG_ROOM("Error al enviar mensaje de inicio al jugador 2");
+    } else {
+        logWithTimestamp("Mensaje de inicio enviado al jugador 2.");
+        LOG_ROOM(start_message + " enviado al jugador 2.");
     }
 
     logWithTimestamp("Ambos jugadores listos. ¡Comienza el juego!");
+    LOG_ROOM("Ambos jugadores listos. ¡Comienza el juego!");
 
     current_turn_socket = player2_socket; // por ejemplo, el player 2 comienza
     other_player_socket = player1_socket;
@@ -79,6 +97,10 @@ void Room::run() {
     ssize_t sent_turn = send(current_turn_socket, msg_str.c_str(), msg_str.size(), 0);
     if (sent_turn == -1) {
         perror("Error al enviar mensaje de turno al jugador 1");
+        LOG_ROOM("Error al enviar mensaje de turno al jugador 1");
+    } else {
+        logWithTimestamp("Mensaje de turno enviado al jugador 1.");
+        LOG_ROOM(msg_str + " enviado al jugador 1.");
     }
 
     gameLoop();
@@ -104,13 +126,18 @@ void Room::waitForPlayersReady() {
 
 
 void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
+    string msg_str = "";
     std::lock_guard<std::mutex> lock(game_mutex);
 
     switch (msg.type) {
         case MessageType::READY:
+            msg_str = createMessage(MessageType::READY, msg.data);
+            LOG_ROOM(msg_str + " recibido del jugador.");
             handleReady(playerSocket, msg);
             break;
         case MessageType::FIRE:
+            msg_str = createMessage(MessageType::FIRE, msg.data);
+            LOG_ROOM(msg_str + " recibido del jugador.");
             handleFire(playerSocket, msg);
             break;
         default:
@@ -144,7 +171,13 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
 
     string cell = msg.data[0];
     addSelectedCell(playerSocket, cell + " ''");  // Agregar la celda disparada a la lista de celdas seleccionadas
+    LOG_ROOM("Celda " + cell + " agregada a la lista de disparos del jugador.");
+    LOG_ROOM("Lista de disparos actualizada: " + vectorToString(playerSocket == player1_socket ? player1_selected_cells : player2_selected_cells));
+
+
     auto [hit, sunk] = applyFire(playerSocket, cell);  // Destructuración válida
+
+    LOG_ROOM("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
 
     MessageType result;
     if (sunk) {
@@ -184,6 +217,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     logWithTimestamp("Turno cambiado.");
+    LOG_ROOM("Turno cambiado. Es el turno del jugador " + to_string(current_turn_socket));
 }
 
 
@@ -197,6 +231,7 @@ void Room::handleVictory(int winnerSocket) {
     send(loserSocket, loseMsg.c_str(), loseMsg.size(), 0);
 
     logWithTimestamp("Juego terminado. ¡Hay un ganador!");
+    LOG_ROOM("Juego terminado. ¡Hay un ganador!");
 }
 
 
@@ -216,7 +251,9 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
     bool sunk = false;
 
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
+    LOG_ROOM("Barcos del oponente: " + vectorOfVectorsToString(opponent_boats));
     auto& attacker_selected_cells = (attackerSocket == player1_socket) ? player1_selected_cells : player2_selected_cells;
+    LOG_ROOM("Celdas seleccionadas del atacante: " + vectorToString(attacker_selected_cells));
 
     vector<string> boat_found;
 
@@ -264,6 +301,7 @@ bool Room::checkVictory(int attackerSocket) {
 
 void Room::gameLoop() {
     logWithTimestamp("🎮 Iniciando bucle del juego...");
+    LOG_ROOM("🎮 Iniciando bucle del juego...");
 
     while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -287,11 +325,16 @@ void Room::gameLoop() {
     
 
     logWithTimestamp("🏁 Juego finalizado en la sala.");
+    LOG_ROOM("🏁 Juego finalizado en la sala.");
 }
 
 //Transformar msg de botes a arreglo bidimensional
 vector<vector<string>> Room::convertBoats(const vector<string>& data) {
     vector<vector<string>> resultado;
+
+    LOG_ROOM("Convirtiendo barcos a formato de arreglo bidimensional.");
+    LOG_ROOM("Datos de barcos: " + vectorToString(data));
+    logWithTimestamp("Datos de barcos: " + vectorToString(data));
 
     for (const string& grupo : data) {
         vector<string> subgrupo;
@@ -304,6 +347,7 @@ vector<vector<string>> Room::convertBoats(const vector<string>& data) {
 
         resultado.push_back(subgrupo);
     }
-
+    LOG_ROOM("Barcos convertidos: " + vectorOfVectorsToString(resultado));
+    logWithTimestamp("Barcos convertidos: " + vectorOfVectorsToString(resultado));
     return resultado;
 }
