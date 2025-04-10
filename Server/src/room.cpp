@@ -206,7 +206,7 @@ void Room::addSelectedCell(int playerSocket, const std::string& cell){
 
 
 std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
-    bool hit = true;
+    bool hit = false;
     bool sunk = false;
 
     auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
@@ -231,7 +231,7 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
         opponent_selected_cells.push_back(cell);
 
         // Verificar si el barco se hundió
-        sunk = true;
+        sunk = false;
         for (const auto& boat_part : boat_found) {
             if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
                 sunk = false;
