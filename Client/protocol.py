@@ -21,6 +21,14 @@ class ProtocolMessage:
 
     def to_string(self):
         return f"{self.type.value}|{','.join(self.data)}"
+    
+    def to_serialized_string(self):
+        if self.type == MessageType.READY and all(isinstance(ship, list) for ship in self.data):
+            # Serializa cada barco como "A1-A2-A3" y los separa con ","
+            flat_ships = ['-'.join(ship) for ship in self.data]
+            return f"{self.type.value}|{','.join(flat_ships)}"
+        else:
+            return self.to_string()
 
     def __str__(self):
         return self.to_string()

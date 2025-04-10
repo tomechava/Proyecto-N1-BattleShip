@@ -15,7 +15,11 @@ game_over = False
 my_turn = False
 
 def send_message(sock, msg: ProtocolMessage):
-    message_str = msg.to_string()
+    if msg.type == MessageType.READY:
+        message_str = f"{msg.type.value}|{','.join(map(lambda x: '-'.join(x), msg.data))}"  
+    else:
+        message_str = msg.to_string()
+    print(f"Enviando mensaje: {message_str}")  # 👈 Log enviado
     log_to_file(f"Enviando mensaje: {message_str}")  # 👈 Log enviado
     sock.sendall((message_str + "\n").encode())
 
@@ -81,6 +85,7 @@ def receive_messages(sock):
             log_to_file(error_msg)
             game_over = True
             break
+
 
 def main():
     global own_board, game_over, my_turn
