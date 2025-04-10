@@ -231,10 +231,10 @@ std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cel
         opponent_selected_cells.push_back(cell);
 
         // Verificar si el barco se hundió
-        sunk = false;
+        sunk = true;        //inicializamos como hundido
         for (const auto& boat_part : boat_found) {
             if (std::find(opponent_selected_cells.begin(), opponent_selected_cells.end(), boat_part) == opponent_selected_cells.end()) {
-                sunk = false;
+                sunk = false;       //si no se encuentra la parte del barco en las celdas seleccionadas, no está hundido
                 break;
             }
         }
