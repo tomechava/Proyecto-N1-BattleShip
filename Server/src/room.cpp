@@ -151,6 +151,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     } else {
         result = hit ? MessageType::HIT : MessageType::MISS;
     }
+    cout << "Resultado del disparo: " << (hit ? "HIT" : "MISS") << endl;
 
     string response = createMessage(result, { cell });
 
