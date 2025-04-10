@@ -280,7 +280,7 @@ void Room::gameLoop() {
             // y disparos se gestionan desde handleFire.
             // Solo estamos esperando a que el juego termine.
         }
-    }
+    
 
     logWithTimestamp("🏁 Juego finalizado en la sala.");
 }
