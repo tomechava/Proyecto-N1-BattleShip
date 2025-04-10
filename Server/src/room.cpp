@@ -252,9 +252,14 @@ void Room::gameLoop() {
             std::lock_guard<std::mutex> lock(game_mutex);
 
             // Si ya hay un ganador, salimos del loop
-            if (checkVictory(player1_socket) || checkVictory(player2_socket)) {
+            if (checkVictory(player1_socket):
+                handleVictory(player1_socket);
+                break;
+            } else if (checkVictory(player2_socket)) {
+                handleVictory(player2_socket);
                 break;
             }
+            // Si no hay ganador, seguimos esperando
 
             // En este punto no hacemos nada más, ya que los turnos
             // y disparos se gestionan desde handleFire.
