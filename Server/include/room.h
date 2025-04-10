@@ -59,6 +59,6 @@ private:
     vector<vector<string>> convertBoats(const vector<string>& data);
 
     // Posicionar seleccion de casillas de cada jugador en 1 arreglo
-    std::vector<std::string> player1_selected_cells;
-    std::vector<std::string> player2_selected_cells;
+    vector<std::string> player1_selected_cells;
+    vector<std::string> player2_selected_cells;
 };
