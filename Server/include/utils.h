@@ -29,7 +29,8 @@ std::string vectorToString(const std::vector<std::string>& vec);
 std::string vectorOfVectorsToString(const std::vector<std::vector<std::string>>& vec);
 std::string setToString(const std::set<std::string>& s);
 std::string vectorOfSetsToString(const std::vector<std::set<std::string>>& vec);
-std::string joinVector (const std::vector<std::string>& vec, const std::string& delimiter);
+std::string joinVector(const std::vector<std::string>& vec, const std::string& delimiter);
+
 
 
 // Macros para logs separados

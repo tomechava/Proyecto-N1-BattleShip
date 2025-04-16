@@ -19,6 +19,7 @@
 #include <vector>
 #include <set>
 #include <sstream>
+#include <tuple>
 
 using namespace std;
 
@@ -57,7 +58,7 @@ private:
     void handleVictory(int winnerSocket);
 
     // Auxiliares
-    std::pair<bool, bool> applyFire(int attackerSocket, const std::string& cell);
+    tuple<bool, bool> applyFire(const string& cell, vector<set<string>>& boats);
     bool checkVictory(int attackerSocket);
     vector<set<string>> convertBoats(const string& data);
 
