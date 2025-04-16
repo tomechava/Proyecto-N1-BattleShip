@@ -77,7 +77,7 @@ std::string vectorOfSetsToString(const std::vector<std::set<std::string>>& vec) 
     return result;
 }
 
-std::string joinVector(const std::vector<std::string>& vec, std::string delimiter = ';') {
+std::string joinVector(const std::vector<std::string>& vec, const std::string& delimiter = ",") {
     std::string result;
     for (size_t i = 0; i < vec.size(); ++i) {
         result += vec[i];
