@@ -152,8 +152,8 @@ void Room::onPlayerMessage(int playerSocket, const ProtocolMessage& msg) {
 
 // Manejo de la señal de "listo"
 void Room::handleReady(int playerSocket, const ProtocolMessage& msg) {
-    if (playerSocket == player1_socket) player1_boats = convertBoats(joinVector(msg.data));
-    if (playerSocket == player2_socket) player2_boats = convertBoats(joinVector(msg.data)); 
+    if (playerSocket == player1_socket) player1_boats = convertBoats(joinVector(msg.data, ","));
+    if (playerSocket == player2_socket) player2_boats = convertBoats(joinVector(msg.data, ",")); 
     if (playerSocket == player1_socket) player1_ready = true;
     if (playerSocket == player2_socket) player2_ready = true;
     logWithTimestamp("Jugador listo.");
