@@ -61,7 +61,4 @@ private:
     bool checkVictory(int attackerSocket);
     vector<set<string>> convertBoats(const string& data);
 
-    // Posicionar seleccion de casillas de cada jugador en 1 arreglo
-    vector<std::string> player1_selected_cells;
-    vector<std::string> player2_selected_cells;
 };

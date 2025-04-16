@@ -174,9 +174,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     }
 
     string cell = msg.data[0];
-    addSelectedCell(playerSocket, cell);  // Agregar la celda disparada a la lista de celdas seleccionadas
-    LOG_ROOM("Celda " + cell + " agregada a la lista de disparos del jugador.");
-    LOG_ROOM("Lista de disparos actualizada: " +setToString(playerSocket == player1_socket ? player1_selected_cells : player2_selected_cells));
+
 
 
     auto [hit, sunk] = applyFire(playerSocket, cell);  // Destructuración válida
@@ -239,15 +237,6 @@ void Room::handleVictory(int winnerSocket) {
 }
 
 
-// Metodo para agregar las casillas jugadas a un arreglo (individual por cada player)
-void Room::addSelectedCell(int playerSocket, const std::string& cell){
-    if (playerSocket == player1_socket){
-        player1_selected_cells.push_back(cell);
-    }else if (playerSocket == player2_socket){
-        player2_selected_cells.push_back(cell);
-    }
-    
-}
 
 
 tuple<bool, bool> applyFire(const string& cell, vector<set<string>>& boats) {
@@ -268,15 +257,12 @@ tuple<bool, bool> applyFire(const string& cell, vector<set<string>>& boats) {
 // Verificar si el jugador ha ganado
 bool Room::checkVictory(int attackerSocket) {
     const auto& boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
-    const auto& selected_cells = (attackerSocket == player1_socket) ? player2_selected_cells : player1_selected_cells;
     for (const auto& boat : boats) {
-        for (const auto& coord : boat) {
-            if (find(selected_cells.begin(), selected_cells.end(), coord) == selected_cells.end()) {
-                return false; // Coordenada no encontrada
-            }
+        if (!boat.empty()) {
+            return false;  // Todavía hay partes de barcos sin hundir
         }
     }
-    return true;
+    return true;  // Todos los barcos están hundidos
 }
 
 void Room::gameLoop() {
