@@ -15,6 +15,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 
 void logWithTimestamp(const std::string& msg);
 
@@ -26,6 +27,8 @@ void logToFile(const std::string& file, const std::string& message);
 
 std::string vectorToString(const std::vector<std::string>& vec);
 std::string vectorOfVectorsToString(const std::vector<std::vector<std::string>>& vec);
+std::string setToString(const std::set<std::string>& s);
+std::string vectorOfSetsToString(const std::vector<std::set<std::string>>& vec);
 
 // Macros para logs separados
 #define LOG_SERVER(msg) logToFile("logs/server.log", msg)

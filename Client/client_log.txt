@@ -208,3 +208,29 @@
 [2025-04-10 10:27:17] Recibido mensaje: HIT|C1
 [2025-04-10 10:27:41] Desconectado del servidor.
 [2025-04-10 10:27:42] Jugador interrumpió el juego manualmente.
+[2025-04-16 18:01:53] Conectado al servidor.
+[2025-04-16 18:02:03] Recibido mensaje: REGISTER|Bienvenido. Esperando a que coloques tus barcos.
+[2025-04-16 18:02:03] Te has unido a la sala: Bienvenido. Esperando a que coloques tus barcos.
+[2025-04-16 18:02:23] Barcos colocados.
+[2025-04-16 18:02:25] Enviando mensaje: READY|A1-A2-A3-A4-A5,A6-A7-A8-A9,B1-B2-B3,B4-B5-B6,B7-B8,B9-B10,A10,C1,C2
+[2025-04-16 18:02:25] Recibido mensaje: READY|
+[2025-04-16 18:02:25] Oponente listo. Juego iniciado.
+[2025-04-16 18:02:42] Recibido mensaje: MISS|J9
+[2025-04-16 18:02:42] Recibido mensaje: TURN|Es tu turno.
+[2025-04-16 18:02:54] Enviando mensaje: FIRE|A1
+[2025-04-16 18:02:54] Recibido mensaje: MISS|A1
+[2025-04-16 18:03:05] Recibido mensaje: MISS|A1
+[2025-04-16 18:03:05] Recibido mensaje: TURN|Es tu turno.
+[2025-04-16 18:03:11] Enviando mensaje: FIRE|J10
+[2025-04-16 18:03:12] Recibido mensaje: MISS|J10
+[2025-04-16 18:03:15] Recibido mensaje: MISS|C3
+[2025-04-16 18:03:15] Recibido mensaje: TURN|Es tu turno.
+[2025-04-16 18:03:28] Enviando mensaje: FIRE|A2
+[2025-04-16 18:03:28] Recibido mensaje: MISS|A2
+[2025-04-16 18:03:32] Recibido mensaje: HIT|C2
+[2025-04-16 18:03:32] Recibido mensaje: TURN|Es tu turno.
+[2025-04-16 18:03:38] Enviando mensaje: FIRE|C1
+[2025-04-16 18:03:38] Recibido mensaje: HIT|C1
+[2025-04-16 18:03:43] Recibido mensaje: MISS|C3
+[2025-04-16 18:03:43] Recibido mensaje: TURN|Es tu turno.
+[2025-04-16 18:03:49] Jugador interrumpió el juego manualmente.

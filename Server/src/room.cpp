@@ -176,7 +176,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     string cell = msg.data[0];
     addSelectedCell(playerSocket, cell);  // Agregar la celda disparada a la lista de celdas seleccionadas
     LOG_ROOM("Celda " + cell + " agregada a la lista de disparos del jugador.");
-    LOG_ROOM("Lista de disparos actualizada: " + vectorToString(playerSocket == player1_socket ? player1_selected_cells : player2_selected_cells));
+    LOG_ROOM("Lista de disparos actualizada: " +setToString(playerSocket == player1_socket ? player1_selected_cells : player2_selected_cells));
 
 
     auto [hit, sunk] = applyFire(playerSocket, cell);  // Destructuración válida
@@ -327,8 +327,8 @@ vector<set<string>> convertBoats(const std::string& data) {
         }
     }
 
-    logWithTimestamp("Barcos convertidos: " + vectorOfVectorsToString(boats));
-    LOG_ROOM("Barcos convertidos: " + vectorOfVectorsToString(boats));
+    logWithTimestamp("Barcos convertidos: " + vectorOfSetsToString(boats));
+    LOG_ROOM("Barcos convertidos: " + vectorOfSetsToString(boats));
 
     return boats;
 }

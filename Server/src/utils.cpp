@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <set>
 
 
 void logWithTimestamp(const std::string& msg) {
@@ -46,6 +47,30 @@ std::string vectorOfVectorsToString(const std::vector<std::vector<std::string>>&
     std::string result = "[";
     for (size_t i = 0; i < vec.size(); ++i) {
         result += vectorToString(vec[i]);
+        if (i != vec.size() - 1) result += ", ";
+    }
+    result += "]";
+    return result;
+}
+
+//Imprimimos barco
+std::string setToString(const std::set<std::string>& s) {
+    std::string result = "{";
+    size_t i = 0;
+    for (const auto& item : s) {
+        result += item;
+        if (i != s.size() - 1) result += ", ";
+        ++i;
+    }
+    result += "}";
+    return result;
+}
+
+//Imprimimos listado de barcos
+std::string vectorOfSetsToString(const std::vector<std::set<std::string>>& vec) {
+    std::string result = "[";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        result += setToString(vec[i]);
         if (i != vec.size() - 1) result += ", ";
     }
     result += "]";
