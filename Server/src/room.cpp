@@ -176,7 +176,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
     string cell = msg.data[0];
 
 
-    applyfire_boats = (playerSocket == player1_socket) ? player2_boats : player1_boats;
+    vector<set<string>> applyfire_boats = (playerSocket == player1_socket) ? player2_boats : player1_boats;
     auto [hit, sunk] = applyFire(cell, applyfire_boats);  // Destructuración válida
 
     LOG_ROOM("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
