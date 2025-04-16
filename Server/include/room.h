@@ -16,6 +16,9 @@
 #include <mutex>
 #include <vector>
 #include "protocol.h"
+#include <vector>
+#include <set>
+#include <sstream>
 
 using namespace std;
 
@@ -40,8 +43,8 @@ private:
     bool player2_ready = false;
 
     // Listado de botes de cada jugador
-    vector<vector<string>> player1_boats;
-    vector<vector<string>> player2_boats;
+    vector<set<string>> player1_boats;
+    vector<set<string>> player2_boats;
 
     void waitForPlayersReady();
     void gameLoop();
@@ -56,7 +59,7 @@ private:
     // Auxiliares
     std::pair<bool, bool> applyFire(int attackerSocket, const std::string& cell);
     bool checkVictory(int attackerSocket);
-    vector<vector<string>> convertBoats(const vector<string>& data);
+    vector<set<string>> convertBoats(const string& data);
 
     // Posicionar seleccion de casillas de cada jugador en 1 arreglo
     vector<std::string> player1_selected_cells;

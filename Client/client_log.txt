@@ -192,3 +192,19 @@
 [2025-04-10 10:19:14] Barcos colocados.
 [2025-04-10 10:23:45] Conectado al servidor.
 [2025-04-10 10:23:48] Desconectado durante espera de sala.
+[2025-04-10 10:26:38] Conectado al servidor.
+[2025-04-10 10:26:38] Recibido mensaje: REGISTER|Bienvenido. Esperando a que coloques tus barcos.
+[2025-04-10 10:26:38] Te has unido a la sala: Bienvenido. Esperando a que coloques tus barcos.
+[2025-04-10 10:26:52] Barcos colocados.
+[2025-04-10 10:26:53] Enviando mensaje: READY|A1-A2-A3-A4-A5,A6-A7-A8-A9,B1-B2-B3,B4-B5-B6,B7-B8,B9-B10,C1,C2,C3
+[2025-04-10 10:26:54] Recibido mensaje: READY|
+[2025-04-10 10:26:54] Oponente listo. Juego iniciado.
+[2025-04-10 10:26:54] Recibido mensaje: TURN|Es tu turno.
+[2025-04-10 10:27:08] Enviando mensaje: FIRE|A1
+[2025-04-10 10:27:08] Recibido mensaje: MISS|A1
+[2025-04-10 10:27:13] Recibido mensaje: HIT|C3
+[2025-04-10 10:27:13] Recibido mensaje: TURN|Es tu turno.
+[2025-04-10 10:27:17] Enviando mensaje: FIRE|C1
+[2025-04-10 10:27:17] Recibido mensaje: HIT|C1
+[2025-04-10 10:27:41] Desconectado del servidor.
+[2025-04-10 10:27:42] Jugador interrumpió el juego manualmente.

@@ -10,6 +10,10 @@
 #include <map>
 #include <mutex>
 #include <algorithm>  // Para std::find
+#include <sstream>   // Para std::stringstream
+#include <set>
+#include <vector>
+#include <tuple>
 
 using namespace std;
 
@@ -246,43 +250,19 @@ void Room::addSelectedCell(int playerSocket, const std::string& cell){
 }
 
 
-std::pair<bool, bool> Room::applyFire(int attackerSocket, const std::string& cell) {
-    bool hit = false;
-    bool sunk = false;
-
-    auto& opponent_boats = (attackerSocket == player1_socket) ? player2_boats : player1_boats;
-    LOG_ROOM("Barcos del oponente: " + vectorOfVectorsToString(opponent_boats));
-    auto& attacker_selected_cells = (attackerSocket == player1_socket) ? player1_selected_cells : player2_selected_cells;
-    LOG_ROOM("Celdas seleccionadas del atacante: " + vectorToString(attacker_selected_cells));
-
-    vector<string> boat_found;
-
-    for (const auto& boat : opponent_boats) {
-        for (const auto& boat_part : boat) {
-            if (cell == boat_part) {
-                hit = true;
-                boat_found = boat;
-                break;
+tuple<bool, bool> applyFire(const string& cell, vector<set<string>>& boats) {
+    for (auto it = boats.begin(); it != boats.end(); ++it) {
+        if (it->count(cell)) {
+            it->erase(cell);  // quitamos la celda golpeada
+            bool sunk = it->empty();  // si quedó vacío, se hundió
+            if (sunk) {
+                boats.erase(it);  // eliminamos el barco hundido de la lista
             }
-        }
-        if (hit) break;
-    }
-
-    if (hit) {
-
-        sunk = true;
-        for (const auto& boat_part : boat_found) {
-            if (find(attacker_selected_cells.begin(), attacker_selected_cells.end(), boat_part) == attacker_selected_cells.end()) {
-                sunk = false;
-                break;
-            }
+            return {true, sunk};
         }
     }
-
-    logWithTimestamp("Jugador disparó a " + cell + (hit ? " (HIT)" : " (MISS)") + (sunk ? " (SUNK)" : ""));
-    return {hit, sunk};
+    return {false, false};  // No fue hit
 }
-
 
 
 // Verificar si el jugador ha ganado
@@ -328,48 +308,27 @@ void Room::gameLoop() {
     LOG_ROOM("🏁 Juego finalizado en la sala.");
 }
 
-//Transformar msg de botes a arreglo bidimensional
-vector<vector<string>> Room::convertBoats(const string& data) {
-    vector<vector<string>> resultado;
+vector<set<string>> convertBoats(const std::string& data) {
+    vector<set<string>> boats;
+    stringstream ss(data);
+    string boat_str;
 
-    LOG_ROOM("Convirtiendo barcos a formato de arreglo bidimensional.");
-    LOG_ROOM("Datos de barcos: " + data);
-    logWithTimestamp("Datos de barcos: " + data);
+    while (getline(ss, boat_str, ',')) {
+        set<string> boat;
+        stringstream boat_ss(boat_str);
+        string cell;
 
-    string cleaned = data;
+        while (getline(boat_ss, cell, '-')) {
+            boat.insert(cell);
+        }
 
-    // Eliminar corchetes exteriores
-    if (!cleaned.empty() && cleaned.front() == '[' && cleaned.back() == ']') {
-        cleaned = cleaned.substr(1, cleaned.size() - 2);
-    }
-
-    string sublist;
-    bool insideSublist = false;
-
-    for (char c : cleaned) {
-        if (c == '[') {
-            insideSublist = true;
-            sublist.clear();
-        } else if (c == ']') {
-            insideSublist = false;
-
-            // Procesar sublista (separar por comas)
-            vector<string> grupo;
-            stringstream ss(sublist);
-            string token;
-
-            while (getline(ss, token, ',')) {
-                grupo.push_back(token);
-            }
-
-            resultado.push_back(grupo);
-        } else if (insideSublist) {
-            sublist += c;
+        if (!boat.empty()) {
+            boats.push_back(boat);
         }
     }
 
-    LOG_ROOM("Barcos convertidos: " + vectorOfVectorsToString(resultado));
-    logWithTimestamp("Barcos convertidos: " + vectorOfVectorsToString(resultado));
+    logWithTimestamp("Barcos convertidos: " + vectorOfVectorsToString(boats));
+    LOG_ROOM("Barcos convertidos: " + vectorOfVectorsToString(boats));
 
-    return resultado;
+    return boats;
 }
