@@ -76,3 +76,12 @@ std::string vectorOfSetsToString(const std::vector<std::set<std::string>>& vec) 
     result += "]";
     return result;
 }
+
+std::string joinVector(const std::vector<std::string>& vec, char delimiter = ';') {
+    std::string result;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        result += vec[i];
+        if (i != vec.size() - 1) result += delimiter;
+    }
+    return result;
+}
