@@ -239,7 +239,7 @@ void Room::handleVictory(int winnerSocket) {
 
 
 
-tuple<bool, bool> applyFire(const string& cell, vector<set<string>>& boats) {
+tuple<bool, bool> Room::applyFire(const string& cell, vector<set<string>>& boats) {
     for (auto it = boats.begin(); it != boats.end(); ++it) {
         if (it->count(cell)) {
             it->erase(cell);  // quitamos la celda golpeada
@@ -294,7 +294,7 @@ void Room::gameLoop() {
     LOG_ROOM("🏁 Juego finalizado en la sala.");
 }
 
-vector<set<string>> convertBoats(const std::string& data) {
+vector<set<string>> Room::convertBoats(const std::string& data) {
     vector<set<string>> boats;
     stringstream ss(data);
     string boat_str;
