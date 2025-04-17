@@ -244,7 +244,6 @@ void Room::handleVictory(int winnerSocket) {
 
 //Verificar la existencia de los botes, si existe la posicion se elimina
 tuple<bool, bool> Room::applyFire(const string& cell, vector<set<string>>& boats) {
-    std::cout << "Comprobar boats" << boats << std::endl;
     for (auto it = boats.begin(); it != boats.end(); ++it) {
         std::cout << "Comprobar it" << it << std::endl;
         std::cout << "Comprobar cell" << cell << std::endl;
