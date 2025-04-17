@@ -173,7 +173,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
         return;
     }
     //cell en mayuscula
-    string cell = toUpper(msg.data[0]);
+    string cell = toupper(msg.data[0]);
 
 
     vector<set<string>> applyfire_boats = (playerSocket == player1_socket) ? player2_boats : player1_boats;
