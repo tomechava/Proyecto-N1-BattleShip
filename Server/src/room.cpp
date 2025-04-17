@@ -243,22 +243,36 @@ void Room::handleVictory(int winnerSocket) {
 
 
 //Verificar la existencia de los botes, si existe la posicion se elimina
-tuple<bool, bool> Room::applyFire(const string& cell, vector<set<string>>& boats) {
+std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std::set<std::string>>& boats) {
+    std::cout << "Comprobar cell: " << cell << std::endl;
+    std::cout << "Estado actual de boats:\n";
+
+    int i = 0;
+    for (const auto& boat : boats) {
+        std::cout << "  Boat " << i++ << ": { ";
+        for (const auto& pos : boat) {
+            std::cout << pos << " ";
+        }
+        std::cout << "}\n";
+    }
+
     for (auto it = boats.begin(); it != boats.end(); ++it) {
-        std::cout << "Comprobar it" << it << std::endl;
-        std::cout << "Comprobar cell" << cell << std::endl;
-        
         if (it->count(cell)) {
+            std::cout << "¡Impacto en: " << cell << "!\n";
             it->erase(cell);  // quitamos la celda golpeada
             bool sunk = it->empty();  // si quedó vacío, se hundió
             if (sunk) {
+                std::cout << "¡Barco hundido!\n";
                 boats.erase(it);  // eliminamos el barco hundido de la lista
             }
             return {true, sunk};
         }
     }
+
+    std::cout << "No fue impacto.\n";
     return {false, false};  // No fue hit
 }
+
 
 
 // Verificar si el jugador ha ganado
