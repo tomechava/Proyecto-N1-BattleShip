@@ -247,16 +247,10 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
     std::cout << "Disparo recibido: " << cell << std::endl;
     std::cout << "Estado actual de barcos:\n";
 
-    int i = 0;
-    for (const auto& boat : boats) {
-        std::cout << "  Barco " << i++ << ": { ";
-        for (const auto& pos : boat) {
-            std::cout << pos << " ";
-        }
-        std::cout << "}\n";
-    }
 
     for (auto it = boats.begin(); it != boats.end(); ++it) {
+        std::cout << "✅ It: " << it << std::endl;
+        std::cout << "Cell: " << cell << std::endl;
         if (it->count(cell) == 1) {
             std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
             it->erase(cell);  // eliminar la casilla golpeada
