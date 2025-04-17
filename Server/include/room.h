@@ -28,7 +28,6 @@ public:
     Room(int player1_socket, int player2_socket);
     void run();
     void onPlayerMessage(int playerSocket, const ProtocolMessage& msg);
-    void addSelectedCell(int playersocket, const std::string& cell);
     
 
 private:

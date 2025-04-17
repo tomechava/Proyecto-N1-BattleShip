@@ -224,7 +224,7 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
 
     logWithTimestamp("Turno cambiado.");
     LOG_ROOM("Turno cambiado. Es el turno del jugador " + to_string(current_turn_socket));
-}
+}//Fin handleFite(){...}
 
 
 // Manejo de la señal de "victoria"
@@ -242,9 +242,13 @@ void Room::handleVictory(int winnerSocket) {
 
 
 
-
+//Verificar la existencia de los botes, si existe la posicion se elimina
 tuple<bool, bool> Room::applyFire(const string& cell, vector<set<string>>& boats) {
+    std::cout << "Comprobar boats" << boats << std::endl;
     for (auto it = boats.begin(); it != boats.end(); ++it) {
+        std::cout << "Comprobar it" << it << std::endl;
+        std::cout << "Comprobar cell" << cell << std::endl;
+        
         if (it->count(cell)) {
             it->erase(cell);  // quitamos la celda golpeada
             bool sunk = it->empty();  // si quedó vacío, se hundió
