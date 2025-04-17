@@ -249,12 +249,18 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
 
 
     for (auto it = boats.begin(); it != boats.end(); ++it) {
-        std::cout << "✅ It: " << it << std::endl;
-        std::cout << "Cell: " << cell << std::endl;
+        std::cout << "✅ Revisando Barco: { ";
+        for (const auto& pos : *it) {  // Imprimir todas las celdas del barco
+            std::cout << pos << " ";
+        }
+        std::cout << "}\n";
+        
+        std::cout << "Cell: " << cell << std::endl;  // Imprimir la celda que estamos comprobando
+    
         if (it->count(cell) == 1) {
             std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
             it->erase(cell);  // eliminar la casilla golpeada
-
+    
             bool sunk = it->empty();
             if (sunk) {
                 std::cout << "🚢 ¡Barco hundido!\n";
@@ -262,10 +268,11 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
             } else {
                 std::cout << "⚠️ Barco dañado, aún sigue a flote.\n";
             }
-
+    
             return {true, sunk};
         }
     }
+    
 
     std::cout << "❌ Disparo fallido. No se impactó ningún barco.\n";
     return {false, false};
