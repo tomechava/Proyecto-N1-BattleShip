@@ -244,12 +244,12 @@ void Room::handleVictory(int winnerSocket) {
 
 //Verificar la existencia de los botes, si existe la posicion se elimina
 std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std::set<std::string>>& boats) {
-    std::cout << "Comprobar cell: " << cell << std::endl;
-    std::cout << "Estado actual de boats:\n";
+    std::cout << "Disparo recibido: " << cell << std::endl;
+    std::cout << "Estado actual de barcos:\n";
 
     int i = 0;
     for (const auto& boat : boats) {
-        std::cout << "  Boat " << i++ << ": { ";
+        std::cout << "  Barco " << i++ << ": { ";
         for (const auto& pos : boat) {
             std::cout << pos << " ";
         }
@@ -257,21 +257,26 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
     }
 
     for (auto it = boats.begin(); it != boats.end(); ++it) {
-        if (it->count(cell)) {
-            std::cout << "¡Impacto en: " << cell << "!\n";
-            it->erase(cell);  // quitamos la celda golpeada
-            bool sunk = it->empty();  // si quedó vacío, se hundió
+        if (it->count(cell) == 1) {
+            std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
+            it->erase(cell);  // eliminar la casilla golpeada
+
+            bool sunk = it->empty();
             if (sunk) {
-                std::cout << "¡Barco hundido!\n";
-                boats.erase(it);  // eliminamos el barco hundido de la lista
+                std::cout << "🚢 ¡Barco hundido!\n";
+                boats.erase(it);  // eliminar el barco del vector
+            } else {
+                std::cout << "⚠️ Barco dañado, aún sigue a flote.\n";
             }
+
             return {true, sunk};
         }
     }
 
-    std::cout << "No fue impacto.\n";
-    return {false, false};  // No fue hit
+    std::cout << "❌ Disparo fallido. No se impactó ningún barco.\n";
+    return {false, false};
 }
+
 
 
 
