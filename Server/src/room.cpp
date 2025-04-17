@@ -14,6 +14,7 @@
 #include <set>
 #include <vector>
 #include <tuple>
+#include <cctype>
 
 using namespace std;
 
@@ -173,7 +174,10 @@ void Room::handleFire(int playerSocket, const ProtocolMessage& msg) {
         return;
     }
     //cell en mayuscula
-    string cell = toupper(msg.data[0]);
+    string cell = msg.data[0];
+    transform(cell.begin(), cell.end(), cell.begin(), [](unsigned char c) {
+        return toupper(c);
+    });
 
 
     vector<set<string>> applyfire_boats = (playerSocket == player1_socket) ? player2_boats : player1_boats;
