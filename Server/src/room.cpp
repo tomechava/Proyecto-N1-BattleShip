@@ -255,7 +255,25 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
         }
         std::cout << "}\n";
         
-        std::cout << "Cell: " << cell << std::endl;  // Imprimir la celda que estamos comprobando
+        std::cout << "Cell: " << cell << std::endl;
+        
+        for(auto i = it.begin(); i != it.end(); ++i){
+            	if(cell == i){
+                    std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
+                    it->erase(cell);  // eliminar la casilla golpeada
+            
+                    /*bool sunk = it->empty();
+                    if (sunk) {
+                        std::cout << "🚢 ¡Barco hundido!\n";
+                        boats.erase(it);  // eliminar el barco del vector
+                    } else {
+                        std::cout << "⚠️ Barco dañado, aún sigue a flote.\n";
+                    }*/
+            
+                    return {true, sunk};  
+                }
+
+        }// Imprimir la celda que estamos comprobando
     
         if (it->count(cell) == 1) {
             std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
