@@ -2,6 +2,10 @@
 
 ### Tomas Echavarria, Manuel Arenas.
 
+# VIDEO EXPLICATIVO
+
+Link video:
+
 # INTRODUCCIÓN
 ## Sobre el proyecto
 Este proyecto consiste en la implementación del clásico juego de Batalla Naval en una arquitectura cliente-servidor. El servidor está desarrollado en C++ utilizando sockets TCP para permitir la conexión simultánea de múltiples clientes, mientras que el cliente está construido en Python con una interfaz por consola. El objetivo principal fue permitir partidas en línea entre dos jugadores, gestionando la colocación de barcos, los turnos de juego y la validación de disparos a través de un protocolo de comunicación personalizado. Además, se buscó diseñar una estructura modular, robusta y extensible, aplicando principios de concurrencia, sincronización y comunicación en red.
