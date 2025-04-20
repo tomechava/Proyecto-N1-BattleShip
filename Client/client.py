@@ -6,7 +6,7 @@ from utils import print_board, create_empty_board, log_to_file  # 👈 NUEVO
 import time
 
 HOST = '13.218.113.170'
-PORT = 8080
+PORT = 22
 
 own_board = create_empty_board()
 enemy_board = create_empty_board()
