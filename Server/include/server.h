@@ -18,7 +18,7 @@
     #include <unistd.h>
 #endif
 
-#define PORT 8080
+#define PORT 22
 
 class Server {
 public:
