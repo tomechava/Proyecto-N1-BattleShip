@@ -253,3 +253,4 @@
 [2025-04-16 19:01:13] Recibido mensaje: TURN|Es tu turno.
 [2025-04-16 19:01:27] Desconectado del servidor.
 [2025-04-16 19:01:31] Jugador interrumpió el juego manualmente.
+[2025-04-20 18:08:46] No se pudo conectar a 54.145.121.148:8080. Error: timed out
