@@ -46,6 +46,8 @@ Este proyecto consiste en la implementación del clásico juego de Batalla Naval
 
 * El servidor aún no detecta correctamente los impactos (HIT) y (SUNK) cuando se recibe un comando FIRE.
 
+* No se logra compilar en el servidor ubuntu, Error desconocido, compila correctamente de forma local (saltandose el uso de la IP y claramente la conexion al servidor).
+
 # CONCLUSIONES
 
 En este proyecto se logró implementar un servidor multicliente para el juego Batalla Naval, con emparejamiento automático, manejo por turnos y comunicación a través de un protocolo personalizado sobre TCP/IP. Elegir un protocolo claro y compatible con TCP fue clave para garantizar una comunicación confiable y ordenada entre clientes y servidor, usando sockets tipo stream que se adaptan bien a este tipo de juegos en tiempo real.
