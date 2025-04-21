@@ -259,7 +259,7 @@ std::tuple<bool, bool> Room::applyFire(const std::string& cell, std::vector<std:
     
         if (it->count(cell) == 1) {
             std::cout << "✅ Impacto en la casilla: " << cell << std::endl;
-            it->erase(cell);  // eliminar la casilla golpeada
+            it->erase(boats.begin() + cell);  // eliminar la casilla golpeada
     
             bool sunk = it->empty();
             if (sunk) {
