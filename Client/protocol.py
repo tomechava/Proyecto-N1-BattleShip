@@ -49,4 +49,4 @@ class ProtocolMessage:
 
 # ✅ Esta función facilita la creación rápida de mensajes
 def create_message(message_type: MessageType, data: list) -> str:
-    return ProtocolMessage(message_type, data).to_
+    return ProtocolMessage(message_type, data).to_string()
