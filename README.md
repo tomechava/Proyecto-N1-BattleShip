@@ -4,7 +4,7 @@
 
 # VIDEO EXPLICATIVO
 
-Link video:
+Link video: [Sustentacion proyecto Battleship Video](https://youtu.be/HTlsBV7OknA?si=vYOvtDV1XSjadIS1)
 
 # INTRODUCCIÓN
 ## Sobre el proyecto
